@@ -1,0 +1,178 @@
+[
+  {
+    "remark": "认证服务",
+    "id": "dkha-auth-server",
+    "uri": "lb://dkha-auth-server",
+    "order": "1",
+    "predicates": [
+      {
+        "name": "Path",
+        "args": {
+          "pattern": "/auth/**"
+        }
+      }
+    ],
+    "filters": [
+      {
+        "name": "StripPrefix",
+        "args": {
+          "StripPrefix": 0
+        }
+      }
+    ]
+  },
+  {
+    "remark": "Admin服务",
+    "id": "dkha-admin-server",
+    "uri": "lb://dkha-admin-server",
+    "order": "2",
+    "predicates": [
+      {
+        "name": "Path",
+        "args": {
+          "pattern": "/sys/**"
+        }
+      }
+    ],
+    "filters": [
+      {
+        "name": "StripPrefix",
+        "args": {
+          "StripPrefix": 0
+        }
+      }
+    ]
+  },
+  {
+    "remark": "监控服务",
+    "id": "dkha-monitor-server",
+    "uri": "lb://dkha-monitor-server",
+    "order": "3",
+    "predicates": [
+      {
+        "name": "Path",
+        "args": {
+          "pattern": "/monitor/**"
+        }
+      }
+    ],
+    "filters": [
+      {
+        "name": "StripPrefix",
+        "args": {
+          "StripPrefix": 0
+        }
+      }
+    ]
+  },
+  {
+    "remark": "OSS服务",
+    "id": "dkha-oss-server",
+    "uri": "lb://dkha-oss-server",
+    "order": "4",
+    "predicates": [
+      {
+        "name": "Path",
+        "args": {
+          "pattern": "/oss/**"
+        }
+      }
+    ],
+    "filters": [
+      {
+        "name": "StripPrefix",
+        "args": {
+          "StripPrefix": 0
+        }
+      }
+    ]
+  },
+  {
+    "remark": "消息服务",
+    "id": "dkha-message-server",
+    "uri": "lb://dkha-message-server",
+    "order": "5",
+    "predicates": [
+      {
+        "name": "Path",
+        "args": {
+          "pattern": "/message/**"
+        }
+      }
+    ],
+    "filters": [
+      {
+        "name": "StripPrefix",
+        "args": {
+          "StripPrefix": 0
+        }
+      }
+    ]
+  },
+  {
+    "remark": "工作流服务",
+    "id": "dkha-activiti-server",
+    "uri": "lb://dkha-activiti-server",
+    "order": "6",
+    "predicates": [
+      {
+        "name": "Path",
+        "args": {
+          "pattern": "/activiti/**"
+        }
+      }
+    ],
+    "filters": [
+      {
+        "name": "StripPrefix",
+        "args": {
+          "StripPrefix": 0
+        }
+      }
+    ]
+  },
+  {
+    "remark": "定时任务服务",
+    "id": "dkha-job-server",
+    "uri": "lb://dkha-job-server",
+    "order": "7",
+    "predicates": [
+      {
+        "name": "Path",
+        "args": {
+          "pattern": "/job/**"
+        }
+      }
+    ],
+    "filters": [
+      {
+        "name": "StripPrefix",
+        "args": {
+          "StripPrefix": 0
+        }
+      }
+    ]
+  },
+  {
+    "remark": "APP流服务",
+    "id": "dkha-api-server",
+    "uri": "lb://dkha-api-server",
+    "order": "8",
+    "predicates": [
+      {
+        "name": "Path",
+        "args": {
+          "pattern": "/api/**"
+        }
+      }
+    ],
+    "filters": [
+      {
+        "name": "StripPrefix",
+        "args": {
+          "StripPrefix": 0
+        }
+      }
+    ]
+  }
+]

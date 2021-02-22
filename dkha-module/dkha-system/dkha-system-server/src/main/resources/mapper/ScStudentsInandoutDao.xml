@@ -1,0 +1,445 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dkha.dao.ScStudentsInandoutDao">
+
+    <resultMap type="com.dkha.entity.ScStudentsInandoutEntity" id="scStudentsInandoutMap">
+        <result property="id" column="id"/>
+        <result property="scStdid" column="sc_stdid"/>
+        <result property="inSum" column="in_sum"/>
+        <result property="outSum" column="out_sum"/>
+        <result property="createDate" column="create_date"/>
+        <result property="type" column="type"/>
+    </resultMap>
+    <select id="getList" resultType="com.dkha.entity.ScPmalarmEntity">
+      SELECT  ss.sc_photoimg,ss.sc_stuname,ss.sc_stdid,sy.dr_num,ss.sc_sex,1 as ss from sc_students  ss
+        left join sc_students_inandout  si on ss.sc_stdid = si.sc_stdid and si.type=1
+        left join sc_dormitoryperson sd on sd.sc_stdid = ss.sc_stdid
+        left join sc_dormitory sy on sy.dr_id = sd.dr_id
+        where si.in_sum is null and si.out_sum is null
+        <if test="startDate != 'null' and startDate != null and startDate.trim() != ''">
+            and t1.pma_alarmtime <![CDATA[ >= ]]> #{startDate}
+        </if>
+        <if test="endDate != 'null' and endDate != null and endDate.trim() != ''">
+            and t1.pma_alarmtime <![CDATA[ >= ]]> #{endDate}
+        </if>
+        UNION ALL
+        -- 宿舍只有进的记录
+        SELECT ss.sc_photoimg,ss.sc_stuname,ss.sc_stdid,sy.dr_num,ss.sc_sex,2 as ss from sc_students  ss
+        left join sc_students_inandout  si on ss.sc_stdid = si.sc_stdid and si.type=1
+        left join sc_dormitoryperson sd on sd.sc_stdid = ss.sc_stdid
+        left join sc_dormitory sy on sy.dr_id = sd.dr_id
+        where si.in_sum !=0 and si.out_sum =0
+        <if test="startDate != 'null' and startDate != null and startDate.trim() != ''">
+            and t1.pma_alarmtime <![CDATA[ >= ]]> #{startDate}
+        </if>
+        <if test="endDate != 'null' and endDate != null and endDate.trim() != ''">
+            and t1.pma_alarmtime <![CDATA[ >= ]]> #{endDate}
+        </if>
+        UNION ALL
+        -- 宿舍只有出的记录
+        SELECT ss.sc_photoimg,ss.sc_stuname,ss.sc_stdid,sy.dr_num,ss.sc_sex,3 as ss from sc_students  ss
+        left join sc_students_inandout  si on ss.sc_stdid = si.sc_stdid and si.type=1
+        left join sc_dormitoryperson sd on sd.sc_stdid = ss.sc_stdid
+        left join sc_dormitory sy on sy.dr_id = sd.dr_id
+        where si.in_sum =0 and  si.out_sum !=0
+        <if test="startDate != 'null' and startDate != null and startDate.trim() != ''">
+            and t1.pma_alarmtime <![CDATA[ >= ]]> #{startDate}
+        </if>
+        <if test="endDate != 'null' and endDate != null and endDate.trim() != ''">
+            and t1.pma_alarmtime <![CDATA[ >= ]]> #{endDate}
+        </if>
+    </select>
+    <select id="getByRoomCountWeek" resultType="com.dkha.dto.ScRoomCountDTO">
+        SELECT
+        DATE_FORMAT( si.create_date, '%Y年第%u周' ) weeks,
+        sum( CASE WHEN ( si.in_sum = 0 AND si.out_sum = 0 ) THEN 1 ELSE 0 END ) AS type1,
+        sum( CASE WHEN ( si.in_sum != 0 AND si.out_sum = 0 ) THEN 1 ELSE 0 END ) AS type2,
+        sum( CASE WHEN ( si.in_sum = 0 AND si.out_sum != 0 ) THEN 1 ELSE 0 END ) AS type3
+        FROM
+         sc_students_inandout si
+        where   si.type = 1
+        <if test="params.startDate != null and params.startDate != ''">
+            and DATE_FORMAT(si.create_date, '%u') >= DATE_FORMAT(#{startDate}, '%u')
+        </if>
+        <if test="params.endDate != null and params.endDate != ''">
+            and DATE_FORMAT(si.create_date, '%u') &lt;= DATE_FORMAT(#{endDate}, '%u')
+        </if>
+        GROUP BY weeks
+    </select>
+    <select id="getByRoomCountMoth" resultType="com.dkha.dto.ScRoomCountDTO">
+        -- 宿舍楼没有出入记录的
+        SELECT
+        DATE_FORMAT( si.create_date,  '%Y年%m月' ) months,
+        sum( CASE WHEN ( si.in_sum = 0 AND si.out_sum = 0 ) THEN 1 ELSE 0 END ) AS type1,
+        sum( CASE WHEN ( si.in_sum != 0 AND si.out_sum = 0 ) THEN 1 ELSE 0 END ) AS type2,
+        sum( CASE WHEN ( si.in_sum = 0 AND si.out_sum != 0 ) THEN 1 ELSE 0 END ) AS type3
+        from  sc_students_inandout  si where and si.type=1
+        <if test="params.startDate != null and params.startDate != ''">
+            and DATE_FORMAT(si.create_date, '%m') >= DATE_FORMAT(#{startDate}, '%m')
+        </if>
+        <if test="params.endDate != null and params.endDate != ''">
+            and DATE_FORMAT(si.create_date, '%m') &lt;= DATE_FORMAT(#{endDate}, '%m')
+        </if>
+        GROUP BY months
+    </select>
+
+    <select id="getByabnormalStudentCountMoth" resultType="com.dkha.dto.ScRoomCountDTO">
+        SELECT  1 as typr,count(1) as sumcount,ss.sc_stdid,ss.sc_stuname,
+        DATE_FORMAT( si.create_date, '%Y年%m月' ) months
+        from sc_students  ss
+        left join sc_students_inandout  si on ss.sc_stdid = si.sc_stdid and si.type=1
+        left join sc_dormitoryperson sd on sd.sc_stdid = ss.sc_stdid
+        left join sc_dormitory sy on sy.dr_id = sd.dr_id
+        where si.in_sum =0 and si.out_sum =0
+        <if test="params.startDate != null and params.startDate != ''">
+            and date(si.create_date) >= date(#{startDate})
+        </if>
+        <if test="params.endDate != null and params.endDate != ''">
+            and date(si.create_date) &lt;= date(#{endDate})
+        </if>
+        GROUP BY months,ss.sc_stdid
+        UNION ALL
+        -- 宿舍只有进的记录
+        SELECT 2 as typr,count(1) as sumcount,ss.sc_stdid,ss.sc_stuname,
+        DATE_FORMAT( si.create_date, '%Y年%m月' ) months
+        from sc_students  ss
+        left join sc_students_inandout  si on ss.sc_stdid = si.sc_stdid and si.type=1
+        left join sc_dormitoryperson sd on sd.sc_stdid = ss.sc_stdid
+        left join sc_dormitory sy on sy.dr_id = sd.dr_id
+        where si.in_sum !=0 and si.out_sum =0
+        <if test="params.startDate != null and params.startDate != ''">
+            and date(si.create_date) >= date(#{startDate})
+        </if>
+        <if test="params.endDate != null and params.endDate != ''">
+            and date(si.create_date) &lt;= date(#{endDate})
+        </if>
+        GROUP BY months,ss.sc_stdid
+        UNION ALL
+        -- 宿舍只有出的记录
+        SELECT 3 as typr,count(1) as sumcount,ss.sc_stdid,ss.sc_stuname,
+        DATE_FORMAT( si.create_date, '%Y年%m月') months
+        from sc_students  ss
+        left join sc_students_inandout  si on ss.sc_stdid = si.sc_stdid and si.type=1
+        left join sc_dormitoryperson sd on sd.sc_stdid = ss.sc_stdid
+        left join sc_dormitory sy on sy.dr_id = sd.dr_id
+        where si.in_sum =0 and si.out_sum !=0
+        <if test="params.startDate != null and params.startDate != ''">
+            and date(si.create_date) >= date(#{startDate})
+        </if>
+        <if test="params.endDate != null and params.endDate != ''">
+            and date(si.create_date) &lt;= date(#{endDate})
+        </if>
+        GROUP BY months,ss.sc_stdid
+    </select>
+
+    <select id="getByabnormalCountMoth" resultType="com.dkha.dto.ScRoomCountDTO">
+        -- 宿舍楼按照月  人 次统计
+        SELECT
+        DATE_FORMAT( si.create_date,  '%Y年%m月' ) months,
+        sum( CASE WHEN ( si.in_sum = 0 AND si.out_sum = 0 ) THEN 1 ELSE 0 END ) AS type1,
+        sum( CASE WHEN ( si.in_sum != 0 AND si.out_sum = 0 ) THEN 1 ELSE 0 END ) AS type2,
+        sum( CASE WHEN ( si.in_sum = 0 AND si.out_sum != 0 ) THEN 1 ELSE 0 END ) AS type3
+        from sc_students  ss
+        left join sc_students_inandout  si on ss.sc_stdid = si.sc_stdid and si.type=1
+        left join sc_dormitoryperson sd on sd.sc_stdid = ss.sc_stdid
+        left join sc_dormitory sy on sy.dr_id = sd.dr_id
+        <if test="params.startDate != null and params.startDate != ''">
+            and date(si.create_date) >= date(#{startDate})
+        </if>
+        <if test="params.endDate != null and params.endDate != ''">
+            and date(si.create_date) &lt;= date(#{endDate})
+        </if>
+        GROUP BY months
+    </select>
+
+    <select id="getByabnormalCountWeek" resultType="com.dkha.dto.ScRoomCountDTO">
+        -- 宿舍楼按照周  人 次统计
+        SELECT
+        DATE_FORMAT( si.create_date,  '%Y年第%u周' ) weeks,
+        sum( CASE WHEN ( si.in_sum = 0 AND si.out_sum = 0 ) THEN 1 ELSE 0 END ) AS type1,
+        sum( CASE WHEN ( si.in_sum != 0 AND si.out_sum = 0 ) THEN 1 ELSE 0 END ) AS type2,
+        sum( CASE WHEN ( si.in_sum = 0 AND si.out_sum != 0 ) THEN 1 ELSE 0 END ) AS type3
+        from sc_students  ss
+        left join sc_students_inandout  si on ss.sc_stdid = si.sc_stdid and si.type=1
+        left join sc_dormitoryperson sd on sd.sc_stdid = ss.sc_stdid
+        left join sc_dormitory sy on sy.dr_id = sd.dr_id
+        <if test="params.startDate != null and params.startDate != ''">
+            and date(si.create_date) >= date(#{startDate})
+        </if>
+        <if test="params.endDate != null and params.endDate != ''">
+            and date(si.create_date) &lt;= date(#{endDate})
+        </if>
+        GROUP BY weeks
+    </select>
+
+    <select id="getByabnormalStudentCountWeek" resultType="com.dkha.dto.ScRoomCountDTO">
+
+        -- 宿舍没有出入记录的
+        SELECT  1 as typr,count(1) as sumcount,ss.sc_stdid,ss.sc_stuname,
+        DATE_FORMAT( si.create_date, '%Y年第%u周' ) weeks
+         from sc_students  ss
+        left join sc_students_inandout  si on ss.sc_stdid = si.sc_stdid and si.type=1
+        left join sc_dormitoryperson sd on sd.sc_stdid = ss.sc_stdid
+        left join sc_dormitory sy on sy.dr_id = sd.dr_id
+           where si.in_sum =0 and si.out_sum =0
+        <if test="params.startDate != null and params.startDate != ''">
+            and date(si.create_date) >= date(#{startDate})
+        </if>
+        <if test="params.endDate != null and params.endDate != ''">
+            and date(si.create_date) &lt;= date(#{endDate})
+        </if>
+        GROUP BY weeks,ss.sc_stdid
+        UNION ALL
+        -- 宿舍只有进的记录
+        SELECT 2 as typr,count(1) as sumcount,ss.sc_stdid,ss.sc_stuname,
+        DATE_FORMAT( si.create_date, '%Y年第%u周' ) weeks
+        from sc_students  ss
+        left join sc_students_inandout  si on ss.sc_stdid = si.sc_stdid and si.type=1
+        left join sc_dormitoryperson sd on sd.sc_stdid = ss.sc_stdid
+        left join sc_dormitory sy on sy.dr_id = sd.dr_id
+        where si.in_sum !=0 and si.out_sum =0
+        <if test="params.startDate != null and params.startDate != ''">
+            and date(si.create_date) >= date(#{startDate})
+        </if>
+        <if test="params.endDate != null and params.endDate != ''">
+            and date(si.create_date) &lt;= date(#{endDate})
+        </if>
+        GROUP BY weeks,ss.sc_stdid
+        UNION ALL
+        -- 宿舍只有出的记录
+        SELECT 3 as typr,count(1) as sumcount,ss.sc_stdid,ss.sc_stuname,
+        DATE_FORMAT( si.create_date, '%Y年第%u周' ) weeks
+        from sc_students  ss
+        left join sc_students_inandout  si on ss.sc_stdid = si.sc_stdid and si.type=1
+        left join sc_dormitoryperson sd on sd.sc_stdid = ss.sc_stdid
+        left join sc_dormitory sy on sy.dr_id = sd.dr_id
+        where si.in_sum =0 and si.out_sum !=0
+        <if test="params.startDate != null and params.startDate != ''">
+            and date(si.create_date) >= date(#{startDate})
+        </if>
+        <if test="params.endDate != null and params.endDate != ''">
+            and date(si.create_date) &lt;= date(#{endDate})
+        </if>
+        GROUP BY weeks,ss.sc_stdid
+    </select>
+     <!-- 教学楼统计 -->
+    <!-- 异常类型按周统计 -->
+    <select id="getByAcademicBuildingWeek" resultType="com.dkha.dto.ScRoomCountDTO">
+      SELECT
+	DATE_FORMAT( si.create_date, '%Y年第%u周' ) weeks,
+	sum( CASE WHEN ( si.in_sum = 0 AND si.out_sum = 0 ) THEN 1 ELSE 0 END ) AS type1,
+	sum( CASE WHEN ( si.in_sum != 0 AND si.out_sum = 0 ) THEN 1 ELSE 0 END ) AS type2,
+	sum( CASE WHEN ( si.in_sum = 0 AND si.out_sum != 0 ) THEN 1 ELSE 0 END ) AS type3
+FROM
+	sc_students ss
+	LEFT JOIN sc_students_inandout si ON ss.sc_stdid = si.sc_stdid
+	AND si.type = 2
+	LEFT JOIN sc_dormitoryperson sd ON sd.sc_stdid = ss.sc_stdid
+	LEFT JOIN sc_dormitory sy ON sy.dr_id = sd.dr_id
+GROUP BY
+	weeks;
+    </select>
+    <!-- 异常类型按月统计 -->
+    <select id="getByAcademicBuildingMonths" resultType="com.dkha.dto.ScRoomCountDTO">
+         SELECT
+            DATE_FORMAT( si.create_date, '%Y年%m月' ) months,
+            sum( CASE WHEN ( si.in_sum = 0 AND si.out_sum = 0 ) THEN 1 ELSE 0 END ) AS type1,
+            sum( CASE WHEN ( si.in_sum != 0 AND si.out_sum = 0 ) THEN 1 ELSE 0 END ) AS type2,
+            sum( CASE WHEN ( si.in_sum = 0 AND si.out_sum != 0 ) THEN 1 ELSE 0 END ) AS type3
+        FROM
+            sc_students ss
+            LEFT JOIN sc_students_inandout si ON ss.sc_stdid = si.sc_stdid
+            AND si.type = 2
+            LEFT JOIN sc_dormitoryperson sd ON sd.sc_stdid = ss.sc_stdid
+            LEFT JOIN sc_dormitory sy ON sy.dr_id = sd.dr_id
+        GROUP BY
+	months;
+    </select>
+
+    <!-- 异常类型按人 月统计 -->
+    <select id="getByAcademicBuildingPersonneMonths" resultType="com.dkha.dto.ScRoomCountDTO">
+        -- 教学楼没有出入记录的
+        SELECT  1 as typr,count(1) as sumcount,ss.sc_stdid,ss.sc_stuname,
+        DATE_FORMAT( si.create_date,  '%Y年%m月' ) months
+         from sc_students  ss
+        left join sc_students_inandout  si on ss.sc_stdid = si.sc_stdid and si.type=2
+        left join sc_dormitoryperson sd on sd.sc_stdid = ss.sc_stdid
+        left join sc_dormitory sy on sy.dr_id = sd.dr_id
+        where si.in_sum =0 and si.out_sum =0
+        GROUP BY months,ss.sc_stdid
+        UNION ALL
+        -- 教学楼只有进的记录
+        SELECT 2 as typr,count(1) as sumcount,ss.sc_stdid,ss.sc_stuname,
+        DATE_FORMAT( si.create_date,  '%Y年%m月' ) months
+        from sc_students  ss
+        left join sc_students_inandout  si on ss.sc_stdid = si.sc_stdid and si.type=2
+        left join sc_dormitoryperson sd on sd.sc_stdid = ss.sc_stdid
+        left join sc_dormitory sy on sy.dr_id = sd.dr_id
+        where si.in_sum !=0 and si.out_sum =0
+        GROUP BY months,ss.sc_stdid
+        UNION ALL
+        -- 教学楼只有出的记录
+        SELECT 3 as typr,count(1) as sumcount,ss.sc_stdid,ss.sc_stuname,
+        DATE_FORMAT( si.create_date,  '%Y年%m月' ) months
+        from sc_students  ss
+        left join sc_students_inandout  si on ss.sc_stdid = si.sc_stdid and si.type=2
+        left join sc_dormitoryperson sd on sd.sc_stdid = ss.sc_stdid
+        left join sc_dormitory sy on sy.dr_id = sd.dr_id
+        where si.in_sum =0 and (si.out_sum is not null or si.out_sum !=0)
+        GROUP BY months,ss.sc_stdid;
+    </select>
+
+    <!-- 异常类型按人 周统计 -->
+    <select id="getByAcademicBuildingPersonneWeeks" resultType="com.dkha.dto.ScRoomCountDTO">
+      	 -- 教学楼没有出入记录的
+        SELECT  1 as typr,count(1) as sumcount,ss.sc_stdid,ss.sc_stuname,
+        DATE_FORMAT( si.create_date, '%Y年第%u周' ) weeks
+         from sc_students  ss
+        left join sc_students_inandout  si on ss.sc_stdid = si.sc_stdid and si.type=2
+        left join sc_dormitoryperson sd on sd.sc_stdid = ss.sc_stdid
+        left join sc_dormitory sy on sy.dr_id = sd.dr_id
+        where si.in_sum =0 and si.out_sum =0
+        GROUP BY weeks,ss.sc_stdid
+        UNION ALL
+        -- 教学楼只有进的记录
+        SELECT 2 as typr,count(1) as sumcount,ss.sc_stdid,ss.sc_stuname,
+        DATE_FORMAT( si.create_date, '%Y年第%u周' ) weeks
+        from sc_students  ss
+        left join sc_students_inandout  si on ss.sc_stdid = si.sc_stdid and si.type=2
+        left join sc_dormitoryperson sd on sd.sc_stdid = ss.sc_stdid
+        left join sc_dormitory sy on sy.dr_id = sd.dr_id
+        where si.in_sum !=0 and si.out_sum =0
+        GROUP BY weeks,ss.sc_stdid
+        UNION ALL
+        -- 教学楼只有出的记录
+        SELECT 3 as typr,count(1) as sumcount,ss.sc_stdid,ss.sc_stuname,
+        DATE_FORMAT( si.create_date, '%Y年第%u周' ) weeks
+        from sc_students  ss
+        left join sc_students_inandout  si on ss.sc_stdid = si.sc_stdid and si.type=2
+        left join sc_dormitoryperson sd on sd.sc_stdid = ss.sc_stdid
+        left join sc_dormitory sy on sy.dr_id = sd.dr_id
+        where si.in_sum =0 and (si.out_sum is not null or si.out_sum !=0)
+        GROUP BY weeks,ss.sc_stdid;
+    </select>
+
+
+    <resultMap type="com.dkha.dto.DataAnalysisDTO" id="notInOrOutMap">
+        <result property="scStuname" column="sc_stuname"/>
+        <result property="scPhonenum" column="sc_phonenum"/>
+        <result property="scSex" column="sc_sex"/>
+        <result property="type" column="type"/>
+        <collection property="dataAnalysisInfoDTOList" ofType="com.dkha.dto.DataAnalysisInfoDTO">
+            <result property="createDate" column="create_date"/>
+            <result property="num" column="num"/>
+        </collection>
+    </resultMap>
+
+    <select id="notInOrOut" resultMap="notInOrOutMap">
+        -- 未进未出
+            SELECT
+                s.sc_stuname,
+                s.sc_phonenum,
+                s.sc_sex,
+                i.create_date,
+                i.type
+            FROM
+                sc_students s
+                LEFT JOIN sc_students_inandout i ON s.sc_stdid = i.sc_stdid
+            WHERE
+                i.sc_stdid IN (
+                SELECT
+                    sc_stdid
+                FROM
+                    sc_students_inandout
+                WHERE
+                    in_sum = 0
+                    AND out_sum = 0
+                    AND type = #{params.vType}
+                    AND   date(create_date) >= #{params.startDate}
+                    AND   date(create_date) &lt;=  #{params.endDate}
+                GROUP BY
+                    sc_stdid
+                HAVING
+                    count( sc_stdid ) >= #{params.num}
+                )
+                AND i.in_sum = 0
+                AND i.out_sum = 0
+                AND type = #{params.vType}
+                AND   date(i.create_date) >= #{params.startDate}
+                AND   date(i.create_date) &lt;=  #{params.endDate}
+            ORDER BY
+                s.sc_stuname
+
+    </select>
+    <select id="onlyInNotOut" resultMap="notInOrOutMap">
+        -- 只进未出
+            SELECT
+                s.sc_stuname,
+                s.sc_phonenum,
+                s.sc_sex,
+                i.create_date,
+                i.type,
+                i.in_sum as num
+            FROM
+                sc_students s
+                LEFT JOIN sc_students_inandout i ON s.sc_stdid = i.sc_stdid
+            WHERE
+                i.sc_stdid IN (
+                SELECT
+                    sc_stdid
+                FROM
+                    sc_students_inandout
+                WHERE
+                    in_sum > 0
+                    AND type = #{params.vType}
+                    AND   date(create_date) >= #{params.startDate}
+                    AND   date(create_date) &lt;=  #{params.endDate}
+                GROUP BY
+                    sc_stdid
+                HAVING
+                    count( sc_stdid ) >= #{params.num}
+                )
+                AND i.in_sum > 0
+                AND type = #{params.vType}
+                AND   date(i.create_date) >= #{params.startDate}
+                AND   date(i.create_date) &lt;=  #{params.endDate}
+            ORDER BY
+                s.sc_stuname
+    </select>
+    <select id="onlyOutNotIn" resultMap="notInOrOutMap">
+        -- 只出未进
+        SELECT
+        s.sc_stuname,
+        s.sc_phonenum,
+        s.sc_sex,
+        i.create_date,
+        i.type,
+        i.out_sum as num
+        FROM
+        sc_students s
+        LEFT JOIN sc_students_inandout i ON s.sc_stdid = i.sc_stdid
+        WHERE
+        i.sc_stdid IN (
+        SELECT
+        sc_stdid
+        FROM
+        sc_students_inandout
+        WHERE
+         out_sum > 0
+        AND type = #{params.vType}
+        AND   date(create_date) >= #{params.startDate}
+        AND   date(create_date) &lt;=  #{params.endDate}
+        GROUP BY
+        sc_stdid
+        HAVING
+        count( sc_stdid ) >= #{params.num}
+        )
+        AND out_sum > 0
+        AND type = #{params.vType}
+        AND   date(i.create_date) >= #{params.startDate}
+        AND   date(i.create_date) &lt;=  #{params.endDate}
+        ORDER BY
+        s.sc_stuname
+    </select>
+</mapper>

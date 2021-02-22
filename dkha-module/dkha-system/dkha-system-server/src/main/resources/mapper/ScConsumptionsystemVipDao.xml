@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dkha.dao.ScConsumptionsystemVipDao">
+
+    <resultMap type="com.dkha.entity.ScConsumptionsystemVipEntity" id="scConsumptionsystemVipMap">
+        <result property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="number" column="number"/>
+        <result property="idno" column="idNo"/>
+        <result property="cardId" column="card_id"/>
+        <result property="balance" column="balance"/>
+        <result property="giveBalance" column="give_balance"/>
+        <result property="rechargeBalance" column="recharge_balance"/>
+        <result property="phone" column="phone"/>
+        <result property="type" column="type"/>
+        <result property="updateDate" column="update_date"/>
+        <result property="oldCardId" column="old_card_id"/>
+        <result property="registerDate" column="register_date"/>
+        <result property="totalPayAmt" column="total_pay_amt"/>
+        <result property="costTotal" column="cost_total"/>
+        <result property="costTotalNum" column="cost_total_num"/>
+        <result property="state" column="state"/>
+    </resultMap>
+
+
+</mapper>

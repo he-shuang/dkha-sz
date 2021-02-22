@@ -1,0 +1,147 @@
+version: '3.3'
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.5.0
+    container_name: elasticsearch
+    restart: always
+    ports:
+      - 9200:9200
+    environment:
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+  skywalking-oap:
+    image: apache/skywalking-oap-server:6.6.0-es7
+    container_name: skywalking-oap
+    depends_on:
+      - elasticsearch
+    links:
+      - elasticsearch
+    restart: always
+    ports:
+      - 11800:11800
+      - 12800:12800
+    environment:
+      - SW_STORAGE=elasticsearch
+      - SW_STORAGE_ES_CLUSTER_NODES=elasticsearch:9200
+  skywalking-ui:
+    image: apache/skywalking-ui:6.6.0
+    container_name: skywalking-ui
+    depends_on:
+      - skywalking-oap
+    links:
+      - skywalking-oap
+    restart: always
+    ports:
+      - 8480:8080
+    environment:
+      - SW_OAP_ADDRESS=skywalking-oap:12800
+  dkha-monitor:
+    image: dkha_io:2.0
+    container_name: dkha-monitor
+    env_file:
+      - common.env
+    volumes:
+      - /data/dkha/dkha-monitor.jar:/app/app.jar
+  dkha-gateway:
+    image: renren_io:2.0
+    container_name: dkha-gateway
+    ports:
+      - "8080:8080"
+    links:
+      - skywalking-oap
+    environment:
+      - SW_AGENT_NAME=dkha-gateway
+      - SW_AGENT_COLLECTOR_BACKEND_SERVICES=skywalking-oap:11800
+    env_file:
+      - common.env
+    volumes:
+      - /data/dkha/dkha-gateway.jar:/app/app.jar
+  dkha-auth:
+    image: renren_io:2.0
+    container_name: dkha-auth
+    links:
+      - skywalking-oap
+    environment:
+      - SW_AGENT_NAME=dkha-auth
+      - SW_AGENT_COLLECTOR_BACKEND_SERVICES=skywalking-oap:11800
+    env_file:
+      - common.env
+    volumes:
+      - /data/dkha/dkha-auth.jar:/app/app.jar
+  dkha-admin:
+    image: renren_io:2.0
+    container_name: dkha-admin-server
+    links:
+      - skywalking-oap
+    environment:
+      - SW_AGENT_NAME=dkha-admin
+      - SW_AGENT_COLLECTOR_BACKEND_SERVICES=skywalking-oap:11800
+    env_file:
+      - common.env
+    volumes:
+      - /data/dkha/dkha-admin-server.jar:/app/app.jar
+  dkha-oss:
+    image: renren_io:2.0
+    container_name: dkha-oss-server
+    links:
+      - skywalking-oap
+    environment:
+      - SW_AGENT_NAME=dkha-oss-server
+      - SW_AGENT_COLLECTOR_BACKEND_SERVICES=skywalking-oap:11800
+    env_file:
+      - common.env
+    volumes:
+      - /data/dkha/dkha-oss-server.jar:/app/app.jar
+  dkha-job:
+    image: renren_io:2.0
+    container_name: dkha-job-server
+    links:
+      - skywalking-oap
+    environment:
+      - SW_AGENT_NAME=dkha-job-server
+      - SW_AGENT_COLLECTOR_BACKEND_SERVICES=skywalking-oap:11800
+    env_file:
+      - common.env
+    volumes:
+      - /data/dkha/dkha-job-server.jar:/app/app.jar
+  dkha-message:
+    image: renren_io:2.0
+    container_name: dkha-message-server
+    links:
+      - skywalking-oap
+    environment:
+      - SW_AGENT_NAME=dkha-message-server
+      - SW_AGENT_COLLECTOR_BACKEND_SERVICES=skywalking-oap:11800
+    env_file:
+      - common.env
+    volumes:
+      - /data/dkha/dkha-message-server.jar:/app/app.jar
+  dkha-activiti:
+    image: renren_io:2.0
+    container_name: dkha-activiti-server
+    links:
+      - skywalking-oap
+    environment:
+      - SW_AGENT_NAME=dkha-activiti-server
+      - SW_AGENT_COLLECTOR_BACKEND_SERVICES=skywalking-oap:11800
+    env_file:
+      - common.env
+    volumes:
+      - /data/dkha/dkha-activiti-server.jar:/app/app.jar
+  dkha-api:
+    image: renren_io:2.0
+    container_name: dkha-api-server
+    links:
+      - skywalking-oap
+    environment:
+      - SW_AGENT_NAME=dkha-api-server
+      - SW_AGENT_COLLECTOR_BACKEND_SERVICES=skywalking-oap:11800
+    env_file:
+      - common.env
+    volumes:
+      - /data/dkha/dkha-api-server.jar:/app/app.jar

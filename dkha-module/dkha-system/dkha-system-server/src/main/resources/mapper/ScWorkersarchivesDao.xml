@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dkha.dao.ScWorkersarchivesDao">
+
+    <resultMap type="com.dkha.entity.ScWorkersarchivesEntity" id="scWorkersarchivesMap">
+        <result property="scWaid" column="sc_waid"/>
+        <result property="scWaname" column="sc_waname"/>
+        <result property="scWasex" column="sc_wasex"/>
+        <result property="scEmpno" column="sc_empno"/>
+        <result property="scEmptype" column="sc_emptype"/>
+        <result property="scStatus" column="sc_status"/>
+        <result property="scPhotoimg" column="sc_photoimg"/>
+        <result property="scRfcardid" column="sc_rfcardid"/>
+        <result property="scUwbid" column="sc_uwbid"/>
+        <result property="scPhonenum" column="sc_phonenum"/>
+        <result property="scHiredate" column="sc_hiredate"/>
+        <result property="scIdno" column="sc_idno"/>
+        <result property="creator" column="creator"/>
+        <result property="createDate" column="create_date"/>
+        <result property="updater" column="updater"/>
+        <result property="updateDate" column="update_date"/>
+    </resultMap>
+
+    <select id="getByScNos" resultType="com.dkha.entity.ScWorkersarchivesEntity">
+        SELECT
+        *
+        FROM
+        sc_workersarchives
+        WHERE
+        sc_empno IN
+        <foreach item="item" collection="list" separator="," open="(" close=")" index="">
+            #{item}
+        </foreach>
+        ORDER BY  FIELD( sc_empno,
+        <foreach item="item" collection="list" separator="," index="">
+            #{item}
+        </foreach>
+        )
+
+    </select>
+
+    <select id="getAllId" resultType="string">
+        SELECT sc_waid FROM sc_workersarchives
+    </select>
+
+
+</mapper>

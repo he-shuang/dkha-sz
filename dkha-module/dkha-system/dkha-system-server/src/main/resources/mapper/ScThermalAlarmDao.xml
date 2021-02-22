@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dkha.dao.ScThermalAlarmDao">
+
+    <resultMap type="com.dkha.entity.ScThermalAlarmEntity" id="scThermalAlarmMap">
+        <result property="tfaId" column="tfa_id"/>
+        <result property="tfDevicesn" column="tf_devicesn"/>
+        <result property="tfId" column="tf_id"/>
+        <result property="tfaEcurrent" column="tfa_ecurrent"/>
+        <result property="tfaAlarmtime" column="tfa_alarmtime"/>
+        <result property="remark" column="remark"/>
+        <result property="tfaIshandle" column="tfa_ishandle"/>
+        <result property="tfDevicename" column="tf_devicename"/>
+        <result property="tfIpgateway" column="tf_ipgateway"/>
+        <result property="tfDevicetype" column="tf_devicetype"/>
+    </resultMap>
+
+    <select id="getThermalAlarmByPage" resultType="com.dkha.entity.ScThermalAlarmEntity">
+
+     SELECT SC.*,SCT.`tf_devicename` ,SCT.`tf_ipgateway` ,SCT.`tf_devicetype` , SCT.tf_setupaddr
+     FROM sc_thermal_alarm SC INNER JOIN  sc_thermal_imaging SCT ON  SC.`tf_id` = SCT.`tf_id` ${ew.customSqlSegment}
+        <if test="params.tfDevicename != null and params.tfDevicename != '' " >
+            and SCT.tf_devicename = #{params.tfDevicename}
+        </if>
+    </select>
+</mapper>

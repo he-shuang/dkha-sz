@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dkha.dao.ScStatisticsDao">
+
+    <resultMap type="com.dkha.entity.ScStatisticsEntity" id="scStatisticsMap">
+        <result property="id" column="id"/>
+        <result property="week" column="week"/>
+        <result property="frequency" column="frequency"/>
+        <result property="numbersum" column="numbersum"/>
+        <result property="createDate" column="create_date"/>
+        <result property="type" column="type"/>
+    </resultMap>
+
+
+    <select id="getByCountWeek" resultType="com.dkha.entity.ScStatisticsEntity">
+        -- 宿舍楼按照周   次统计
+        SELECT
+        DATE_FORMAT( si.create_date, '%Y年第%u周' ) weeks,
+        si.*
+        FROM
+        sc_statistics si
+        WHERE
+        si.type = 1
+        <if test="params.startDate != null and params.startDate != ''">
+            and DATE_FORMAT(si.create_date, '%u') >= DATE_FORMAT(#{params.startDate}, '%u')
+        </if>
+        <if test="params.endDate != null and params.endDate != ''">
+            and DATE_FORMAT(si.create_date, '%u') &lt;= DATE_FORMAT(#{params.endDate}, '%u')
+        </if>
+    </select>
+    <select id="getByCountMonths" resultType="com.dkha.entity.ScStatisticsEntity">
+        -- 宿舍楼按照月   次统计
+        SELECT
+        DATE_FORMAT( si.create_date, '%Y年%m月' ) months,
+        si.*
+        FROM
+        sc_statistics si
+        WHERE
+        si.type = 1
+        <if test="params.startDate != null and params.startDate != ''">
+            and DATE_FORMAT(si.create_date, '%m') >= DATE_FORMAT(#{params.startDate }, '%m')
+        </if>
+        <if test="params.endDate != null and params.endDate != ''">
+            and DATE_FORMAT(si.create_date, '%m') &lt;= DATE_FORMAT(#{params.endDate}, '%m')
+        </if>
+    </select>
+
+
+
+    <select id="getByAcademicWeek" resultType="com.dkha.entity.ScStatisticsEntity">
+        -- 教学楼按照周   次统计
+        SELECT
+        DATE_FORMAT( si.create_date, '%Y年第%u周' ) weeks,
+        si.*
+        FROM
+        sc_statistics si
+        WHERE
+        si.type = 2
+        <if test="params.startDate != null and params.startDate != ''">
+            and DATE_FORMAT(si.create_date, '%u') >= DATE_FORMAT(#{params.startDate}, '%u')
+        </if>
+        <if test="params.endDate != null and params.endDate != ''">
+            and DATE_FORMAT(si.create_date, '%u') &lt;= DATE_FORMAT(#{params.endDate}, '%u')
+        </if>
+    </select>
+    <select id="getByAcademicMonths" resultType="com.dkha.entity.ScStatisticsEntity">
+        -- 教学楼按照月   次统计
+        SELECT
+        DATE_FORMAT( si.create_date, '%Y年%m月' ) months,
+        si.*
+        FROM
+        sc_statistics si
+        WHERE
+        si.type = 2
+        <if test="params.startDate != null and params.startDate != ''">
+            and DATE_FORMAT(si.create_date, '%m') >= DATE_FORMAT(#{params.startDate }, '%m')
+        </if>
+        <if test="params.endDate != null and params.endDate != ''">
+            and DATE_FORMAT(si.create_date, '%m') &lt;= DATE_FORMAT(#{params.endDate}, '%m')
+        </if>
+    </select>
+
+</mapper>

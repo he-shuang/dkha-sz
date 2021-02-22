@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dkha.dao.ScVisitorrecordDao">
+
+    <resultMap type="com.dkha.entity.ScVisitorrecordEntity" id="scVisitorrecordMap">
+        <result property="vrId" column="vr_id"/>
+        <result property="vrName" column="vr_name"/>
+        <result property="vrSex" column="vr_sex"/>
+        <result property="vrIdno" column="vr_idno"/>
+        <result property="vrPhoneimg" column="vr_phoneimg"/>
+        <result property="vrVistorbegintime" column="vr_vistorbegintime"/>
+        <result property="vrInterviewed" column="vr_interviewed"/>
+        <result property="vrReasons" column="vr_reasons"/>
+        <result property="vrUwbid" column="vr_uwbid"/>
+        <result property="vrVistorendtime" column="vr_vistorendtime"/>
+        <result property="vrReturnuwb" column="vr_returnuwb"/>
+        <result property="vrTemperature" column="vr_temperature"/>
+        <result property="vrAddress" column="vr_address"/>
+        <result property="creator" column="creator"/>
+        <result property="createDate" column="create_date"/>
+        <result property="updater" column="updater"/>
+        <result property="updateDate" column="update_date"/>
+        <result property="dfFloorid" column="df_floorid"/>
+    </resultMap>
+
+    <select id="getMyList" resultType="com.dkha.entity.ScVisitorrecordEntity">
+        select a.*,w.sc_waname as vrInterviewedName,f.floorname,f.parentfloorname from sc_visitorrecord a inner join (select t1.vr_id from sc_visitorrecord t1 where 1=1
+        <if test="vrSex != 'null' and vrSex != null and vrSex.trim() != ''">
+            and t1.vr_sex = #{vrSex}
+        </if>
+        <if test="vrName != '%null%' and vrName != null and vrName.trim() != ''">
+            and t1.vr_name like #{vrName}
+        </if>
+        <if test="startDate != 'null' and startDate != null and startDate.trim() != ''">
+            and t1.vr_vistorbegintime <![CDATA[ >= ]]> #{startDate}
+        </if>
+        <if test="endDate != 'null' and endDate != null and endDate.trim() != ''">
+            and t1.vr_vistorbegintime <![CDATA[ <= ]]> #{endDate}
+        </if>
+        <if test="deviceNumber != 'null' and deviceNumber != null and deviceNumber.trim() != ''">
+            and t1.device_number = #{deviceNumber}
+        </if>
+        order by t1.vr_returnuwb asc,t1.vr_vistorbegintime desc limit #{scol},#{ipagesize})b on a.vr_id=b.vr_id
+        left join sc_workersarchives w on a.vr_interviewed = w.sc_waid
+        LEFT JOIN (SELECT f1.`df_floorid`,f1.df_floorname AS floorname,f1.df_parentid,f2.`df_floorname` AS parentfloorname FROM sc_dormitoryfloor f1 INNER JOIN  sc_dormitoryfloor f2 ON f1.`df_parentid`=f2.`df_floorid`) f ON a.`df_floorid`=f.df_floorid
+        where 1=1 order by a.vr_returnuwb asc,a.vr_vistorbegintime desc
+    </select>
+
+    <select id="getMyCount" resultType="Long">
+        select count(1) total from sc_visitorrecord t1 where 1=1
+        <if test="vrSex != 'null' and vrSex != null and vrSex.trim() != ''">
+            and t1.vr_sex = #{vrSex}
+        </if>
+        <if test="vrName != '%null%' and vrName != null and vrName.trim() != ''">
+            and t1.vr_name like #{vrName}
+        </if>
+        <if test="startDate != 'null' and startDate != null and startDate.trim() != ''">
+            and t1.vr_vistorbegintime <![CDATA[ >= ]]> #{startDate}
+        </if>
+        <if test="endDate != 'null' and endDate != null and endDate.trim() != ''">
+            and t1.vr_vistorbegintime <![CDATA[ <= ]]> #{endDate}
+        </if>
+        <if test="deviceNumber != 'null' and deviceNumber != null and deviceNumber.trim() != ''">
+            and t1.device_number = #{deviceNumber}
+        </if>
+    </select>
+
+    <update id="returnCard">
+		update sc_visitorrecord set vr_returnuwb = 1,vr_vistorendtime = now(),update_date = now(),updater = #{userId} where vr_id = #{vrId}
+	</update>
+
+    <select id="getListUwbId" resultType="java.lang.Long">
+        select t1.vr_uwbid from sc_visitorrecord t1 where 1=1 and t1.vr_returnuwb = 0 and t1.df_floorid = #{dfFloorid}
+    </select>
+
+    <select id="getMyScUwbLabelToInfo" resultType="com.dkha.dto.ScUwbLabelToInfoDTO">
+        select t4.vr_id id,t4.vr_name personName,-3 emptype,t4.vr_phoneimg personPic,'工牌' tagType,t4.vr_uwbid uwbId
+        ,concat('性别@',t4.vr_sex,'@@被访人@',t4.vr_interviewed,'@@身份证@',t4.vr_idno) moreinfo from sc_visitorrecord t4
+        where t4.vr_returnuwb = 1 and t4.vr_id = #{vrId} limit 1
+    </select>
+
+    <select id="selectDayCount" resultType="java.lang.Integer">
+        select count(1) from sc_visitorrecord where vr_returnuwb = #{type} and date(vr_vistorbegintime) = date(date)
+    </select>
+
+    <select id="getVisitorData" resultType="map">
+        SELECT
+        v.*,d.df_floorname floorname
+        FROM sc_visitorrecord v
+        left join sc_dormitoryfloor d on v.df_floorid = d.df_floorid
+        ORDER BY
+        v.create_date
+        DESC
+        limit 10
+    </select>
+
+    <select id="getTemperatureWarning" resultType="map">
+        SELECT
+        f.image_url image,
+        f.recognition_name `name`,
+        f.temperature temperature,
+        CONCAT(
+        if(s.sc_stdid,'学生','')
+        ,if(v.vr_id,'访客','')
+        ,if(w.sc_emptype='0','教师','')
+        ,if(w.sc_emptype='1','保洁','')
+        ,if(w.sc_emptype='2','保安','')
+        ) as emptype
+        FROM
+        sc_faceverification f
+        LEFT JOIN sc_students s on s.sc_stdid = f.person_code
+        LEFT JOIN sc_visitorrecord v on v.vr_id = f.person_code
+        LEFT JOIN sc_workersarchives w on w.sc_waid = f.person_code
+        where DATE(f.create_date) = DATE(#{today})
+        and temperature >= #{temperature}
+    </select>
+
+
+
+    <select id="list" resultType="com.dkha.entity.ScVisitorrecordEntity">
+        select a.* from sc_visitorrecord a inner join (select t1.vr_id from sc_visitorrecord t1 where 1=1
+        <if test="vrSex != 'null' and vrSex != null and vrSex.trim() != ''">
+            and t1.vr_sex = #{vrSex}
+        </if>
+        <if test="vrName != '%null%' and vrName != null and vrName.trim() != ''">
+            and t1.vr_name like #{vrName}
+        </if>
+        <if test="startDate != 'null' and startDate != null and startDate.trim() != ''">
+            and t1.vr_vistorbegintime <![CDATA[ >= ]]> #{startDate}
+        </if>
+        <if test="endDate != 'null' and endDate != null and endDate.trim() != ''">
+            and t1.vr_vistorbegintime <![CDATA[ <= ]]> #{endDate}
+        </if>
+        <if test="deviceNumber != 'null' and deviceNumber != null and deviceNumber.trim() != ''">
+            and t1.device_number = #{deviceNumber}
+        </if>
+        order by t1.vr_vistorbegintime desc )b on a.vr_id=b.vr_id
+        where 1=1 order by a.vr_vistorbegintime desc
+    </select>
+
+<!--    <resultMap id="BaseMap" type="com.dkha.dto.TestDTO">-->
+<!--        <result property="weeks" column="weeks"/>-->
+<!--        <collection property="floorname" ofType="com.dkha.dto.FloornameDTO">-->
+<!--            <result property="floorname" column="floorname"/>-->
+<!--            <collection property="name" ofType="com.dkha.dto.NamedTO">-->
+<!--                <result property="count" column="count"/>-->
+<!--                <result property="vrname" column="vrname"/>-->
+<!--            </collection>-->
+<!--        </collection>-->
+<!--    </resultMap>-->
+
+    <select id="visitorWeek" resultType="com.dkha.dto.VisitorStatisticsDTO">
+            SELECT
+            DATE_FORMAT( v.create_date, '%Y年第%u周' ) dateStr,
+						d.df_floorname floorname,
+            count( 1 ) count
+        FROM
+            sc_visitorrecord v
+            LEFT JOIN sc_dormitoryfloor d ON v.df_floorid = d.df_floorid
+        WHERE
+            v.df_floorid IS NOT NULL
+        <if test="params.startDate != null and params.startDate != ''">
+            and DATE_FORMAT(v.create_date, '%Y%u') >= DATE_FORMAT(#{params.startDate}, '%Y%u')
+        </if>
+        <if test="params.endDate != null and params.endDate != ''">
+            and DATE_FORMAT(v.create_date, '%Y%u') &lt;= DATE_FORMAT(#{params.endDate}, '%Y%u')
+        </if>
+        GROUP BY
+        dateStr,
+            v.df_floorid
+
+    </select>
+
+    <select id="visitorMonth" resultType="com.dkha.dto.VisitorStatisticsDTO">
+            SELECT
+                DATE_FORMAT( v.create_date, '%Y年%m月' ) dateStr,
+                count( 1 ) count,
+                d.df_floorname floorname
+            FROM
+                sc_visitorrecord v
+                LEFT JOIN sc_dormitoryfloor d ON v.df_floorid = d.df_floorid
+            WHERE
+                v.df_floorid IS NOT NULL
+        <if test="params.startDate != null and params.startDate != ''">
+            and DATE_FORMAT(v.create_date, '%Y%m') >= DATE_FORMAT(#{params.startDate}, '%Y%m')
+        </if>
+        <if test="params.endDate != null and params.endDate != ''">
+            and DATE_FORMAT(v.create_date, '%Y%m') &lt;= DATE_FORMAT(#{params.endDate}, '%Y%m')
+        </if>
+            GROUP BY
+        dateStr,
+                v.df_floorid
+
+    </select>
+
+
+
+    <select id="visitorWorkersWeek" resultType="com.dkha.dto.VisitorStatisticsDTO">
+            SELECT
+                DATE_FORMAT( v.create_date, '%Y年第%u周' ) dateStr,
+                w.sc_waname name,
+                count( 1 ) count,
+                v.vr_interviewed
+            FROM
+                sc_visitorrecord v
+                LEFT JOIN sc_workersarchives w ON v.vr_interviewed = w.sc_waid
+            WHERE
+                v.vr_interviewed IS NOT NULL
+        <if test="params.startDate != null and params.startDate != ''">
+            and DATE_FORMAT(v.create_date, '%Y%u') >= DATE_FORMAT(#{params.startDate}, '%Y%u')
+        </if>
+        <if test="params.endDate != null and params.endDate != ''">
+            and DATE_FORMAT(v.create_date, '%Y%u') &lt;= DATE_FORMAT(#{params.endDate}, '%Y%u')
+        </if>
+            GROUP BY
+                dateStr,
+                v.vr_interviewed
+    </select>
+
+    <select id="visitorWorkersMonth" resultType="com.dkha.dto.VisitorStatisticsDTO">
+            SELECT
+                DATE_FORMAT( v.create_date, '%Y年%m月' ) dateStr,
+                w.sc_waname name,
+                count( 1 ) count,
+                v.vr_interviewed
+
+            FROM
+                sc_visitorrecord v
+                LEFT JOIN sc_workersarchives w ON v.vr_interviewed = w.sc_waid
+            WHERE
+                v.vr_interviewed IS NOT NULL
+        <if test="params.startDate != null and params.startDate != ''">
+            and DATE_FORMAT(v.create_date, '%Y%m') >= DATE_FORMAT(#{params.startDate}, '%Y%m')
+        </if>
+        <if test="params.endDate != null and params.endDate != ''">
+            and DATE_FORMAT(v.create_date, '%Y%m') &lt;= DATE_FORMAT(#{params.endDate}, '%Y%m')
+        </if>
+            GROUP BY
+                dateStr,
+                v.vr_interviewed
+
+    </select>
+</mapper>

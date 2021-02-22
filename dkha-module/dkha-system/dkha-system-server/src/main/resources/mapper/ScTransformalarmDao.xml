@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dkha.dao.ScTransformalarmDao">
+
+    <resultMap type="com.dkha.entity.ScTransformalarmEntity" id="scTransformalarmMap">
+        <result property="tfaId" column="tfa_id"/>
+        <result property="tfDevicesn" column="tf_devicesn"/>
+        <result property="tfId" column="tf_id"/>
+        <result property="tfaEcurrent" column="tfa_ecurrent"/>
+        <result property="tfaAlarmtime" column="tfa_alarmtime"/>
+        <result property="drNum" column="dr_num"/>
+        <result property="drRoomid" column="dr_roomid"/>
+    </resultMap>
+
+    <select id="getMyList" resultType="com.dkha.entity.ScTransformalarmEntity">
+        select a.*,(select concat(z.df_floorname,'-',x.dr_num) from sc_dormitory x,sc_dormitoryfloor y,sc_dormitoryfloor z where x.dr_id = a.dr_roomid
+        and x.df_floorid = y.df_floorid and y.df_type =1 and y.df_parentid = z.df_floorid) roomName
+        from sc_transformalarm a inner join (select t1.tfa_id from sc_transformalarm t1 where 1=1
+        <if test="startDate != 'null' and startDate != null and startDate.trim() != ''">
+            and t1.tfa_alarmtime <![CDATA[ >= ]]> #{startDate}
+        </if>
+        <if test="endDate != 'null' and endDate != null and endDate.trim() != ''">
+            and t1.tfa_alarmtime <![CDATA[ <= ]]> #{endDate}
+        </if>
+        order by t1.tfa_alarmtime desc limit #{scol},#{ipagesize})b on a.tfa_id=b.tfa_id
+        where 1=1 order by a.tfa_alarmtime desc
+    </select>
+
+    <select id="getMyCount" resultType="Long">
+        select count(1) total from sc_transformalarm t1 where 1=1
+        <if test="startDate != 'null' and startDate != null and startDate.trim() != ''">
+            and t1.tfa_alarmtime <![CDATA[ >= ]]> #{startDate}
+        </if>
+        <if test="endDate != 'null' and endDate != null and endDate.trim() != ''">
+            and t1.tfa_alarmtime <![CDATA[ <= ]]> #{endDate}
+        </if>
+    </select>
+</mapper>

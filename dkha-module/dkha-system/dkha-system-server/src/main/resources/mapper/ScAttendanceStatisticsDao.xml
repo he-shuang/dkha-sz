@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dkha.dao.ScAttendanceStatisticsDao">
+
+    <resultMap type="com.dkha.entity.ScAttendanceStatisticsEntity" id="scAttendanceStatisticsMap">
+        <result property="id" column="id"/>
+        <result property="aeDevicename" column="ae_devicename"/>
+        <result property="aeId" column="ae_id"/>
+        <result property="scWaid" column="sc_waid"/>
+        <result property="scWaname" column="sc_waname"/>
+        <result property="stDate" column="st_date"/>
+        <result property="stNum" column="st_num"/>
+    </resultMap>
+
+    <resultMap type="com.dkha.dto.ScAttendanceStatisticsDataDTO" id="baseMap">
+        <result property="aeDevicename" column="ae_devicename"/>
+        <result property="scWaname" column="sc_waname"/>
+        <collection property="scAttendanceStatisticsDataInfoDTOList" ofType="com.dkha.dto.ScAttendanceStatisticsDataInfoDTO">
+            <result property="stDate" column="st_date"/>
+            <result property="stNum" column="st_num"/>
+        </collection>
+    </resultMap>
+
+    <select id="dataInfo" resultMap="baseMap">
+                select sc_waname,ae_devicename,st_date,st_num from sc_attendance_statistics WHERE DATE_SUB(CURDATE(), INTERVAL 7 DAY) &lt;= date(st_date)
+                <if test="params.scWaid != null and params.scWaid != ''">
+                    and sc_waid = #{params.scWaid}
+                </if>
+                <if test="params.scWaname != null and params.scWaname != ''">
+                    and sc_waname like #{params.scWaname}
+                </if>
+                ORDER BY sc_waname
+
+    </select>
+    <select id="list" resultType="com.dkha.entity.ScAttendanceStatisticsEntity">
+        select any_value(sc_waname) sc_waname,any_value(ae_devicename) ae_devicename,SUM(st_num) st_num from sc_attendance_statistics
+
+        <where>
+            <if test="params.scWaid != null and params.scWaid != ''">
+                sc_waid = #{params.scWaid}
+            </if>
+            <if test="params.scWaname != null and params.scWaname != ''">
+                and sc_waname like #{params.scWaname}
+            </if>
+            <if test="params.startDate != null and params.startDate.trim() != ''">
+                and st_date  >=  #{params.startDate}
+            </if>
+            <if test="params.endDate != null and params.endDate.trim() != ''">
+                and st_date  &lt;=  #{params.endDate}
+            </if>
+        </where>
+
+        GROUP BY sc_waid,ae_id
+
+    </select>
+
+</mapper>

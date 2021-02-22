@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dkha.dao.GlobalValidationDao">
+
+
+    <select id="checkUwb" resultType="java.lang.Integer">
+        SELECT
+        COUNT( * )
+        FROM
+            (
+                ( SELECT t.sc_uwbid AS uwb, t.sc_stdid AS id FROM sc_students t ) UNION
+                ( SELECT t1.sc_uwbid AS uwb, t1.sc_waid AS id FROM sc_workersarchives t1 ) UNION
+                ( SELECT t2.vr_uwbid AS uwb, t2.vr_id AS id FROM sc_visitorrecord t2 where t2.vr_returnuwb = 0) UNION
+                ( SELECT t3.uwb AS uwb, t3.im_id AS id FROM sc_important_device t3 )
+            ) p
+        WHERE
+            p.uwb = #{uwb}
+            <if test="id != null">
+                AND p.id != #{id}
+            </if>
+    </select>
+
+    <select id="checkRfid" resultType="java.lang.Integer">
+        SELECT
+            COUNT( * )
+        FROM
+            (
+                ( SELECT t.sc_rfcardid AS rfid, t.sc_stdid AS id FROM sc_students t ) UNION
+                ( SELECT t1.sc_rfcardid AS rfid, t1.sc_waid AS id FROM sc_workersarchives t1 )
+            ) p
+        WHERE
+            p.rfid = #{rfid}
+            <if test="id != null">
+                AND p.id != #{id}
+            </if>
+    </select>
+</mapper>

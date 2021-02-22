@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dkha.dao.ScTransformerroomDao">
+
+    <resultMap type="com.dkha.entity.ScTransformerroomEntity" id="scTransformerroomMap">
+        <result property="tfrId" column="tfr_id"/>
+        <result property="drId" column="dr_id"/>
+        <result property="tfId" column="tf_id"/>
+        <result property="tfDevicesn" column="tf_devicesn"/>
+        <result property="tfrDrroomno" column="tfr_drroomno"/>
+        <result property="tfrPortaddr" column="tfr_portaddr"/>
+        <result property="tfrRelationdate" column="tfr_relationDate"/>
+    </resultMap>
+    <delete id="deleteByGateId">
+        DELETE FROM sc_transformerroom WHERE tf_id=#{tfId}
+    </delete>
+    <select id="findAllById" resultType="com.dkha.dto.ScTransformerroomDTO">
+        SELECT * FROM sc_transformerroom WHERE tf_id=#{id}
+    </select>
+    <select id="selectRoomById" resultType="com.dkha.entity.ScTransformerroomEntity">
+        SELECT * FROM sc_transformerroom WHERE dr_id=#{drId}
+    </select>
+    <delete id="deleteByNull">
+        DELETE FROM sc_transformerroom WHERE dr_id IS NULL
+    </delete>
+    <select id="selectByTfId" resultType="com.dkha.entity.ScTransformerroomEntity">
+        SELECT tf_id,tfr_drroomno,dr_id FROM sc_transformerroom WHERE tf_id=#{drId}
+    </select>
+</mapper>

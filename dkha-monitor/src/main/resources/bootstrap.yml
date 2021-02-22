@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: dkha-monitor-server
+  profiles:
+    active: dev
+  boot:
+    admin:
+      context-path: /monitor

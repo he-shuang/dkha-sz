@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dkha.dao.ScDevicebindingDao">
+
+<!--    <resultMap type="com.dkha.entity.ScDevicebindingEntity" id="scDevicebindingMap">
+        <result property="id" column="id"/>
+        <result property="deviceId" column="device_id"/>
+        <result property="coordinate" column="coordinate"/>
+        <result property="mapId" column="map_id"/>
+        <result property="floor" column="floor"/>
+        <result property="remark" column="remark"/>
+    </resultMap>-->
+    <select id="getBadingDevice" resultType="com.dkha.entity.ScDevicebindingEntity">
+
+           SELECT
+            de.id,
+            de.device_id AS deviceId,
+            de.coordinate AS coordinate,
+            de.map_id AS mapId,
+            de.floor AS floor,
+            de.remark AS remark,
+            b.STATUS,
+            b.deid AS deid,
+            b.device AS device,
+            b.devicename AS devicename,
+						b.setupdate,
+            b.type AS type
+        FROM
+            (
+        SELECT
+            c.tf_id AS deid,
+            "3" AS type,
+            tf_devicesn AS device,
+            c.tf_devicename AS devicename,
+						c.tf_setupdate AS setupdate,
+            c.tf_status AS STATUS
+        FROM
+            sc_transformerdc c UNION
+        SELECT
+            mo.mbd_id AS deid,
+            mo.mbd_devicetype,
+            mo.mbd_devicesn AS device,
+            mo.mbd_devicename,
+						mo.mbd_setupdate,
+            mo.mdb_status
+        FROM
+            sc_modbusdevicedc mo UNION
+        SELECT
+            gat.gw_id AS deid,
+            "4" AS type,
+            gat.gw_sn AS device,
+            gat.gw_name,
+				gat.gw_setupdate,
+            gat.gw_state
+        FROM
+            sc_gatewaydc gat UNION
+        SELECT
+            im.im_id AS deid,
+            "5" AS type,
+            im.im_devicesn AS device,
+            im.im_devicename,
+						im.im_setupdate,
+            im.im_status
+        FROM
+            sc_important_device im
+            ) AS b
+            RIGHT JOIN sc_devicebinding de ON de.device_id = b.deid
+			ORDER BY de.create_date Desc
+
+  </select>
+    <select id="getAllDevice" resultType="com.dkha.entity.ScDevicebindingEntity">
+        <!-- 电流互感器 -->
+
+        SELECT
+        c.tf_id AS deid,
+        "3" AS type,
+        c.tf_devicename AS devicename,c.tf_status as status
+        FROM
+        sc_transformerdc c UNION
+        <!-- pir , 智能灯  PM2.5 -->
+        SELECT
+        mo.mbd_id AS deid,
+        mo.mbd_devicetype,
+        mbd_devicename,mo.mdb_status
+        FROM
+        sc_modbusdevicedc mo UNION
+        <!-- 网关设备 -->
+        SELECT
+        gat.gw_id AS deid,
+        "4" AS type,
+        gat.gw_name,gat.gw_state
+        FROM
+        sc_gatewaydc gat UNION
+        <!-- 重要设备信息 -->
+        SELECT
+        im.im_id AS deid,
+        "5" AS type,
+        im.im_devicename,im.im_status
+        FROM
+        sc_important_device im
+
+    </select>
+    <select id="getNoBangding" resultType="com.dkha.entity.ScDevicebindingEntity">
+        SELECT
+        b.deid as deid,
+        b.type AS type,
+        b.devicename as devicename,
+		b.device as device,
+		b.setupdate,
+        b.status as status
+        FROM
+        (
+        SELECT
+        c.tf_id AS deid,
+        "3" AS type,
+		tf_devicesn AS device,
+        c.tf_devicename AS devicename,
+					c.tf_setupdate AS setupdate,
+				c.tf_status as status
+        FROM
+        sc_transformerdc c UNION
+
+        SELECT
+        mo.mbd_id AS deid,
+        mo.mbd_devicetype,
+		mo.mbd_devicesn AS device,
+        mbd_devicename,
+				mo.mbd_setupdate,
+				mo.mdb_status
+        FROM
+        sc_modbusdevicedc mo UNION
+
+        SELECT
+        gat.gw_id AS deid,
+        "4" AS type,
+		gat.gw_sn AS device,
+        gat.gw_name,
+				gat.gw_setupdate,
+				gat.gw_state
+        FROM
+        sc_gatewaydc gat UNION
+
+        SELECT
+        im.im_id AS deid,
+        "5" AS type,
+		im.im_devicesn AS device,
+        im.im_devicename,
+					im.im_setupdate,
+				im.im_status
+        FROM
+        sc_important_device im
+        ) AS b
+         where b.deid not in( select de.device_id from sc_devicebinding de where de.device_id is not null)
+        ORDER BY b.setupdate desc
+    </select>
+
+    <select id="getIsAlarm" resultType="com.dkha.dto.AlarmMassge">
+      SELECT DISTINCT
+            c.tf_id AS deid,
+			sf.tfa_id AS id,
+            "407" AS alarmType,
+            c.tf_devicesn AS device,
+            c.tf_devicename AS devicename,
+            c.tf_status AS STATUS
+        FROM
+            sc_transformerdc c
+            LEFT JOIN sc_transformalarm sf ON sf.tf_id = c.tf_id and  sf.tfa_ishandle = 0
+        WHERE
+            c.is_alarm IS NOT NULL
+            AND c.is_alarm = 0
+			and sf.tfa_id  is not null
+			UNION
+        SELECT DISTINCT
+            mo.mbd_id AS deid,
+			scp.pma_id AS id,
+            "401" AS alarmType,
+            mo.mbd_devicesn AS device,
+            mbd_devicename AS devicename,
+            mo.mdb_status AS STATUS
+        FROM
+            sc_modbusdevicedc mo
+            LEFT JOIN sc_pmalarm scp ON scp.pma_deviceid = mo.mbd_id  and  scp.pma_ishandle = 0
+        WHERE
+            mo.is_alarm IS NOT NULL
+            AND mo.is_alarm = 0
+			and scp.pma_id is not null
+    </select>
+
+    <select id="getAlarmHistory" resultType="com.dkha.dto.AlarmMassge">
+                SELECT
+                  scp.pma_id as id,
+                    scp.pma_deviceid AS deid,
+                   "401" AS alarmType,
+                   mo.mbd_devicesn AS device,
+                    mo.mbd_devicename AS devicename,
+                    mo.mdb_status AS STATUS
+                FROM
+                    sc_pmalarm scp
+                    LEFT JOIN sc_modbusdevicedc mo ON scp.pma_deviceid = mo.mbd_id
+                    AND mo.mbd_devicetype &lt;&gt; 2
+                where 1=1
+                <if test="startTime!=null and startTime != ''">
+                    and   <![CDATA[ DATE_FORMAT( scp.pma_alarmtime,'%Y-%m-%d') >= DATE_FORMAT(#{startTime},'%Y-%m-%d') ]]>
+                </if>
+                <if test="endTime!=null and endTime != ''">
+                    and <![CDATA[ DATE_FORMAT(scp.pma_alarmtime,'%Y-%m-%d') <= DATE_FORMAT(#{endTime},'%Y-%m-%d') ]]>
+                </if>
+    </select>
+  </mapper>

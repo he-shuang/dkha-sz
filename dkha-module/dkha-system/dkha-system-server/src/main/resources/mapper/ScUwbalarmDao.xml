@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dkha.dao.ScUwbalarmDao">
+
+    <resultMap type="com.dkha.entity.ScUwbalarmEntity" id="scUwbalarmMap">
+        <result property="ubaId" column="uba_id"/>
+        <result property="ubaAlarmtype" column="uba_alarmtype"/>
+        <result property="ubaUwbid" column="uba_uwbid"/>
+        <result property="ubaUwbregionno" column="uba_uwbregionno"/>
+        <result property="ubaAlarmtime" column="uba_alarmtime"/>
+        <result property="ubaIshandler" column="uba_ishandler"/>
+        <result property="ubaAddress" column="uba_address"/>
+    </resultMap>
+
+    <select id="getMyList" resultType="com.dkha.entity.ScUwbalarmEntity">
+        SELECT
+        su.*,
+        CONCAT(
+        IF
+        ( ss.sc_stuname is not null, ss.sc_stuname, ''),
+        IF
+        ( si.vr_name is not null, si.vr_name, '' ),
+        IF
+        ( sd.im_devicename is not null, sd.im_devicename,''  ),
+        IF
+        ( sw.sc_waname is not null, sw.sc_waname,''  )
+        ) AS uwbname
+        FROM
+        sc_uwbalarm su
+        LEFT JOIN sc_students ss ON su.uba_uwbid = ss.sc_uwbid
+        LEFT JOIN sc_important_device sd ON su.uba_uwbid = sd.uwb
+        LEFT JOIN sc_workersarchives sw ON sw.sc_uwbid = su.uba_uwbid
+        LEFT JOIN sc_visitorrecord si ON si.vr_uwbid = su.uba_uwbid
+        <where>
+        <if test="params.ubaAddress != '%null%' and params.ubaAddress != null and params.ubaAddress.trim() != ''">
+            and su.uba_address like #{params.ubaAddress}
+        </if>
+        <if test="params.startDate != 'null' and params.startDate != null and params.startDate.trim() != ''">
+            and su.uba_alarmtime <![CDATA[ >= ]]> #{params.startDate}
+        </if>
+        <if test="params.endDate != 'null' and params.endDate != null and params.endDate.trim() != ''">
+            and su.uba_alarmtime <![CDATA[ <= ]]> #{params.endDate}
+        </if>
+        </where>
+            order by su.uba_alarmtime desc
+    </select>
+
+    <select id="getMyCount" resultType="Long">
+        SELECT
+        COUNT(*)
+        FROM
+        (
+        SELECT
+        su.*,
+        CONCAT(
+        IF
+        ( ss.sc_stuname, '', ss.sc_stuname ),
+        IF
+        ( si.vr_name, '', si.vr_name ),
+        IF
+        ( sd.im_devicename, '', sd.im_devicename ),
+        IF
+        ( sw.sc_waname, '', sw.sc_waname )
+        ) AS uwbname
+        FROM
+        sc_uwbalarm su
+        LEFT JOIN sc_students ss ON su.uba_uwbid = ss.sc_uwbid
+        LEFT JOIN sc_important_device sd ON su.uba_uwbid = sd.uwb
+        LEFT JOIN sc_workersarchives sw ON sw.sc_uwbid = su.uba_uwbid
+        LEFT JOIN sc_visitorrecord si ON si.vr_uwbid = su.uba_uwbid
+        <where>
+            <if test="ubaAddress != '%null%' and ubaAddress != null and ubaAddress.trim() != ''">
+                and su.uba_address like #{ubaAddress}
+            </if>
+            <if test="startDate != 'null' and startDate != null and startDate.trim() != ''">
+                and su.uba_alarmtime <![CDATA[ >= ]]> #{startDate}
+            </if>
+            <if test="endDate != 'null' and endDate != null and endDate.trim() != ''">
+                and su.uba_alarmtime <![CDATA[ <= ]]> #{endDate}
+            </if>
+        </where>
+        )as b
+    </select>
+</mapper>

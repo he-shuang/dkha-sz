@@ -1,0 +1,47 @@
+package com.dkha.excel;
+
+import cn.afterturn.easypoi.excel.annotation.Excel;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+import java.io.Serializable;
+import java.util.Date;
+
+/**
+ * 
+ *
+ * @author dkha 
+ * @since v1.0.0 2020-10-27
+ */
+@Data
+public class ScStatisticsWeekExcel implements Serializable {
+	private static final long serialVersionUID = 1L;
+
+    /**
+     * 周数
+     */
+	@Excel(name = "周数")
+	private String weeks;
+	/**
+	 * 年月
+	 */@Excel(name = "月数")
+	private String months;
+	/**
+	 * 没有进没有出 次数
+	 */
+	@Excel(name = "未进未出数量")
+	private int type1;
+	/**
+	 * 只有进 次数
+	 */
+	@Excel(name = "只有进数量")
+	private int type2;
+	/**
+	 * 只有出 次数
+	 */
+	@Excel(name = "只有出数量")
+	private int type3;
+
+}

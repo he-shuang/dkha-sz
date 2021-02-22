@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dkha.dao.ScPmalarmDao">
+
+    <resultMap type="com.dkha.entity.ScPmalarmEntity" id="scPmalarmMap">
+        <result property="pmaId" column="pma_id"/>
+        <result property="pmaDevicesn" column="pma_devicesn"/>
+        <result property="pmaDeviceid" column="pma_deviceid"/>
+        <result property="pmaValue" column="pma_value"/>
+        <result property="pmaAlarmtime" column="pma_alarmtime"/>
+        <result property="pmaAddress" column="pma_address"/>
+        <result property="pmaTemperature" column="pma_temperature"/>
+        <result property="pmaHumidity" column="pma_humidity"/>
+    </resultMap>
+
+    <select id="getMyList" resultType="com.dkha.entity.ScPmalarmEntity">
+        select a.* ,m.mbd_devicename as devicename from sc_pmalarm a inner join (select t1.pma_id from sc_pmalarm t1
+        LEFT JOIN sc_modbusdevicedc m ON t1.pma_deviceid = m.mbd_id
+
+        where 1=1
+        <if test="devicename != '%null%' and devicename != null and devicename.trim() != ''">
+            and m.mbd_devicename like   #{devicename}
+        </if>
+        <if test="pmaAddress != '%null%' and pmaAddress != null and pmaAddress.trim() != ''">
+            and t1.pma_address like #{pmaAddress}
+        </if>
+        <if test="startDate != 'null' and startDate != null and startDate.trim() != ''">
+            and t1.pma_alarmtime <![CDATA[ >= ]]> #{startDate}
+        </if>
+        <if test="endDate != 'null' and endDate != null and endDate.trim() != ''">
+            and t1.pma_alarmtime <![CDATA[ <= ]]> #{endDate}
+        </if>
+        order by t1.pma_alarmtime desc limit #{scol},#{ipagesize})b
+        on a.pma_id=b.pma_id
+        left join sc_modbusdevicedc m on a.pma_deviceid = m.mbd_id
+        where 1=1 order by a.pma_alarmtime desc
+    </select>
+
+    <select id="getMyCount" resultType="Long">
+        select count(1) total from sc_pmalarm t1
+        LEFT JOIN sc_modbusdevicedc m ON t1.pma_deviceid = m.mbd_id
+        where 1=1
+
+        <if test="devicename != '%null%' and devicename != null and devicename.trim() != ''">
+            and m.mbd_devicename like   #{devicename}
+        </if>
+        <if test="pmaAddress != '%null%' and pmaAddress != null and pmaAddress.trim() != ''">
+            and t1.pma_address like #{pmaAddress}
+        </if>
+        <if test="startDate != 'null' and startDate != null and startDate.trim() != ''">
+            and t1.pma_alarmtime <![CDATA[ >= ]]> #{startDate}
+        </if>
+        <if test="endDate != 'null' and endDate != null and endDate.trim() != ''">
+            and t1.pma_alarmtime <![CDATA[ <= ]]> #{endDate}
+        </if>
+    </select>
+</mapper>

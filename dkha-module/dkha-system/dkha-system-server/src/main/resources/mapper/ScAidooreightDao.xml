@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dkha.dao.ScAidooreightDao">
+
+    <resultMap type="com.dkha.entity.ScAidooreightEntity" id="scAidooreightMap">
+        <result property="aeId" column="ae_id"/>
+        <result property="aeClientip" column="ae_clientip"/>
+        <result property="aeClientport" column="ae_clientport"/>
+        <result property="aeMacaddress" column="ae_macaddress"/>
+        <result property="aeSerialnumber" column="ae_serialnumber"/>
+        <result property="aeDevicename" column="ae_devicename"/>
+        <result property="aeSigntype" column="ae_signtype"/>
+        <result property="aeSignkey" column="ae_signkey"/>
+        <result property="aeDeviceid" column="ae_deviceid"/>
+        <result property="aeSetupdate" column="ae_setupdate"/>
+        <result property="aeExpirydate" column="ae_expirydate"/>
+        <result property="aeSetupaddr" column="ae_setupaddr"/>
+        <result property="aeState" column="ae_state"/>
+        <result property="remark" column="remark"/>
+        <result property="dfFloorid" column="df_floorid"/>
+        <result property="aeDatetime" column="ae_datetime"/>
+        <result property="aeVersionname" column="ae_versionname"/>
+        <result property="aeVersioncode" column="ae_versioncode"/>
+        <result property="aePackagename" column="ae_packagename"/>
+        <result property="aeFacetotal" column="ae_facetotal"/>
+        <result property="aeFacedowntime" column="ae_facedowntime"/>
+        <result property="aeMainboard" column="ae_mainboard"/>
+
+    </resultMap>
+    <select id="findPage" resultType="com.dkha.entity.ScAidooreightEntity">
+        select t.*,
+        (
+        SELECT
+        GROUP_CONCAT( df_floorname SEPARATOR ' / ')
+        FROM
+        sc_dormitoryfloor
+        WHERE
+        FIND_IN_SET( df_floorid, t.`df_floorid` )) AS floorName
+         from sc_aidooreight t
+        <if test="(params.username != null and params.username.trim() != '') or (params.userno != null and params.userno.trim() != '')">
+            LEFT JOIN sc_aidooreight_personlist t1 on t.ae_id = t1.ae_id
+        </if>
+        <where>
+
+
+            <if test="params.devicename != null and params.devicename.trim() != ''">
+                t.ae_devicename like #{params.devicename}
+            </if>
+            <if test="params.aeClientip != null and params.aeClientip.trim() != ''">
+                and t.ae_clientip like #{params.aeClientip}
+            </if>
+            <if test="params.state != null and params.state.trim() != ''">
+                and t.ae_state = #{params.state}
+            </if>
+            <if test="params.floorid != null and params.floorid.trim() != ''">
+                and FIND_IN_SET(#{params.floorid},t.df_floorid)
+            </if>
+            <if test="params.username != null and params.username.trim() != ''">
+                and t1.username = #{params.username}
+            </if>
+            <if test="params.userno != null and params.userno.trim() != ''">
+                and t1.userno = #{params.userno}
+            </if>
+            <if test="params.deptId != null and params.deptId != ''">
+                and ae_id IN (SELECT door_id FROM sc_dept_door_scope WHERE dept_id = #{params.deptId})
+            </if>
+        </where>
+
+        ORDER by inet_aton(t.ae_clientip) asc
+
+    </select>
+    <select id="listNoStopDevice" resultType="com.dkha.entity.ScAidooreightEntity">
+        select * from sc_aidooreight where ae_state != 1 and ae_transstate = 0
+    </select>
+</mapper>

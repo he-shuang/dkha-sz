@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dkha.dao.ScPersonidequipconfDao">
+
+    <resultMap type="com.dkha.entity.ScPersonidequipconfEntity" id="scPersonidequipconfMap">
+        <result property="pideId" column="pide_id"/>
+        <result property="pieEquipsn" column="pie_equipsn"/>
+        <result property="thresholdvalue" column="thresholdvalue"/>
+        <result property="openmonocular" column="openMonocular"/>
+        <result property="openbioliveness" column="openBioLiveness"/>
+        <result property="adminaccount" column="adminAccount"/>
+        <result property="adminpwd" column="adminPwd"/>
+        <result property="configurable" column="configurable"/>
+        <result property="ttsmodel" column="ttsModel"/>
+        <result property="passstr" column="passStr"/>
+        <result property="failedstr" column="failedStr"/>
+        <result property="devicereportbaseurl" column="deviceReportBaseUrl"/>
+        <result property="devicereportsuburl" column="deviceReportSubUrl"/>
+        <result property="cardrecordbaseurl" column="cardRecordBaseUrl"/>
+        <result property="cardrecordsuburl" column="cardRecordSubUrl"/>
+        <result property="isidservervalidate" column="isIDServerValidate"/>
+        <result property="idservervalidateurl" column="idServerValidateUrl"/>
+        <result property="version" column="version"/>
+    </resultMap>
+    <select id="getNewInfo" resultType="com.dkha.entity.ScPersonidequipconfEntity">
+        select * from sc_personidequipconf order by pide_id desc LIMIT 1
+    </select>
+
+
+</mapper>

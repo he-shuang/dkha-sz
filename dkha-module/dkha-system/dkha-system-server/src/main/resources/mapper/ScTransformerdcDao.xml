@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dkha.dao.ScTransformerdcDao">
+
+    <resultMap type="com.dkha.entity.ScTransformerdcEntity" id="scTransformerdcMap">
+        <result property="tfId" column="tf_id"/>
+        <result property="tfDevicesn" column="tf_devicesn"/>
+        <result property="tfDevicename" column="tf_devicename"/>
+        <result property="tfDevicetype" column="tf_devicetype"/>
+        <result property="tfStatus" column="tf_status"/>
+        <result property="tfSetupdate" column="tf_setupdate"/>
+        <result property="tfExpirydate" column="tf_expirydate"/>
+        <result property="tfIpgateway" column="tf_ipgateway"/>
+        <result property="tfSetupaddr" column="tf_setupaddr"/>
+        <result property="dfFloorid" column="df_floorid"/>
+    </resultMap>
+
+    <select id="findPage" resultType="com.dkha.entity.ScTransformerdcEntity">
+        SELECT * FROM sc_transformerdc
+        <where>
+            <if test="params !=null and params.tfDevicename !=null and params.tfDevicename neq ''">
+                AND tf_devicename LIKE '%${params.tfDevicename}%'
+            </if>
+            <if test="params !=null and params.tfStatus !=null and params.tfStatus neq ''">
+                AND tf_status=#{params.tfStatus}
+            </if>
+        </where>
+    </select>
+
+</mapper>

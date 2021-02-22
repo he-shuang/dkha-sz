@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dkha.dao.ScUwbLabelDao">
+
+    <select id="getMyList" resultType="com.dkha.dto.ScUwbLabelToInfoDTO">
+        select t.sc_stdid id,t.sc_stuname personName,-1 emptype,t.sc_photoimg personPic,'工牌' tagType,t.sc_uwbid uwbId
+        ,concat('性别@',t.sc_sex,'@@学号@',t.sc_no,'@@身份证@',t.sc_idno) moreinfo from sc_students t where t.sc_uwbid <![CDATA[ <> ]]> ''
+        union
+        select t2.sc_waid,t2.sc_waname,t2.sc_emptype emptype,t2.sc_photoimg,'工牌' tagType,t2.sc_uwbid
+        ,concat('性别@',t2.sc_wasex,'@@职工编号@',t2.sc_empno,'@@身份证@',t2.sc_idno) moreinfo from sc_workersarchives t2 where t2.sc_uwbid <![CDATA[ <> ]]> ''
+        union
+        select t3.im_id,t3.im_devicename,-2 emptype,'' personPic,'蓝牙' tagType,t3.uwb
+        ,concat('设备编号@',t3.im_devicesn,'@@设备IP@',t3.im_ipgateway) moreinfo from sc_important_device t3
+        union
+        select t4.vr_id,t4.vr_name,-3 emptype,t4.vr_phoneimg,'工牌' tagType,t4.vr_uwbid
+        ,concat('性别@',t4.vr_sex,'@@被访人@',t4.vr_interviewed,'@@身份证@',t4.vr_idno) moreinfo from sc_visitorrecord t4 where t4.vr_returnuwb = 0 and t4.vr_uwbid <![CDATA[ <> ]]> ''
+    </select>
+
+    <select id="getUwbPerRole" resultType="map">
+        select t1.dict_label,t1.dict_value from sys_dict_data t1 where exists (select 1 from sys_dict_type t2 where t2.dict_type = 'uwbperrole' and t2.id = t1.dict_type_id)
+    </select>
+
+</mapper>

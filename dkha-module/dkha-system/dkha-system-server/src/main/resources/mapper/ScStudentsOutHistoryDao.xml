@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dkha.dao.ScStudentsOutHistoryDao">
+
+    <resultMap type="com.dkha.entity.ScStudentsOutHistoryEntity" id="scStudentsOutHistoryMap">
+        <result property="id" column="id"/>
+        <result property="date" column="date"/>
+        <result property="num" column="num"/>
+    </resultMap>
+    <select id="notReturnedStatistics" resultType="com.dkha.entity.ScStudentsOutHistoryEntity">
+        SELECT * FROM sc_students_out_history where DATE_SUB(date(now()), INTERVAL 6 DAY) &lt;= date(date) ORDER BY  date desc
+    </select>
+
+
+</mapper>

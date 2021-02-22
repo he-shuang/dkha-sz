@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dkha.dao.ScStudentsOutEverydayDetailsDao">
+
+    <resultMap type="com.dkha.entity.ScStudentsOutEverydayDetailsEntity" id="scStudentsOutEverydayDetailsMap">
+        <result property="id" column="id"/>
+        <result property="scStdid" column="sc_stdid"/>
+        <result property="createDate" column="create_date"/>
+    </resultMap>
+    <select id="findPage" resultType="com.dkha.dto.ScStudentsOutEverydayDetailsDTO">
+
+        select d.*,s.sc_stuname,s.sc_sex,s.sc_no,s.sc_idno,s.sc_registerdate
+        ,s.sc_status,s.sc_education,s.sc_photoimg,s.sc_rfcardid,s.sc_uwbid
+        ,s.sc_phonenum,s.sc_graduationdate
+
+        from sc_students_out_everyday_details d left join sc_students s on d.sc_stdid = s.sc_stdid
+        <where>
+            <if test="params.date != null and params.date.trim() != ''">
+                DATE_FORMAT( d.create_date, '%Y-%m-%d %H:%i' ) =  DATE_FORMAT( #{params.date}, '%Y-%m-%d %H:%i' )
+            </if>
+
+        </where>
+        ORDER BY d.create_date desc
+    </select>
+
+    <select id="findCountSum" resultType="com.dkha.dto.ScStudentsCountDTO">
+        SELECT
+        ss.sc_photoimg,
+        ss.sc_stuname,
+        any_value(sy.dr_num)as dr_num ,
+        ss.sc_sex,
+        ss.sc_phonenum,
+        sc.sc_stdid,
+        any_value(sc.create_date) as create_date,
+        COUNT(*) as number
+        FROM
+        sc_students_out_everyday_details sc
+        LEFT JOIN sc_students ss ON ss.sc_stdid = sc.sc_stdid
+        LEFT JOIN sc_dormitoryperson sd ON sd.sc_stdid = ss.sc_stdid
+        LEFT JOIN sc_dormitory sy ON sy.dr_id = sd.dr_id
+        <where>
+            <if test="params.startDate != 'null' and params.startDate != null and params.startDate.trim() != ''">
+                sc.create_date <![CDATA[ >= ]]> #{params.startDate}
+            </if>
+            <if test="params.endDate != 'null' and params.endDate != null and params.endDate.trim() != ''">
+                and sc.create_date <![CDATA[ <= ]]> #{params.endDate}
+            </if>
+
+        </where>
+        GROUP BY
+        sc.sc_stdid  ORDER BY number DESC;
+    </select>
+
+    <select id="findCountRoomSum" resultType="com.dkha.dto.ScStudentsCountDTO">
+        SELECT
+        any_value(sy.dr_num)as dr_num ,
+        any_value(sc.create_date) as create_date,
+        COUNT(dr_num) AS number
+        FROM
+        sc_students_out_everyday_details sc
+        LEFT JOIN sc_students ss ON ss.sc_stdid = sc.sc_stdid
+        LEFT JOIN sc_dormitoryperson sd ON sd.sc_stdid = ss.sc_stdid
+        LEFT JOIN sc_dormitory sy ON sy.dr_id = sd.dr_id
+
+        <where>
+            <if test="params.startDate != 'null' and params.startDate != null and params.startDate.trim() != ''">
+                sc.create_date <![CDATA[ >= ]]> #{params.startDate}
+            </if>
+            <if test="params.endDate != 'null' and params.endDate != null and params.endDate.trim() != ''">
+                and sc.create_date <![CDATA[ <= ]]> #{params.endDate}
+            </if>
+
+        </where>
+        GROUP BY
+        dr_num
+        ORDER BY
+        number desc
+    </select>
+
+    <select id="findList" resultType="com.dkha.dto.ScStudentsCountDTO">
+        SELECT
+        ss.sc_photoimg,
+        ss.sc_stuname,
+        any_value(sy.dr_num)as dr_num ,
+        ss.sc_sex,
+        sc.sc_stdid,
+        any_value(sc.create_date) as create_date,
+        COUNT(*) as number
+        FROM
+        sc_students_out_everyday_details sc
+        LEFT JOIN sc_students ss ON ss.sc_stdid = sc.sc_stdid
+        LEFT JOIN sc_dormitoryperson sd ON sd.sc_stdid = ss.sc_stdid
+        LEFT JOIN sc_dormitory sy ON sy.dr_id = sd.dr_id
+        <where>
+            <if test="params.startDate != 'null' and params.startDate != null and params.startDate.trim() != ''">
+                sc.create_date <![CDATA[ >= ]]> #{params.startDate}
+            </if>
+            <if test="params.endDate != 'null' and params.endDate != null and params.endDate.trim() != ''">
+                and sc.create_date <![CDATA[ <= ]]> #{params.endDate}
+            </if>
+
+        </where>
+        GROUP BY
+        sc.sc_stdid
+        ORDER BY number DESC;
+    </select>
+    <select id="findCountRoomExcel" resultType="com.dkha.dto.ScStudentsCountDTO">
+        SELECT
+        any_value(sy.dr_num)as dr_num ,
+        any_value(sc.create_date) as create_date,
+        COUNT(dr_num) AS number
+        FROM
+        sc_students_out_everyday_details sc
+        LEFT JOIN sc_students ss ON ss.sc_stdid = sc.sc_stdid
+        LEFT JOIN sc_dormitoryperson sd ON sd.sc_stdid = ss.sc_stdid
+        LEFT JOIN sc_dormitory sy ON sy.dr_id = sd.dr_id
+
+        <where>
+            <if test="params.startDate != 'null' and params.startDate != null and params.startDate.trim() != ''">
+                sc.create_date <![CDATA[ >= ]]> #{params.startDate}
+            </if>
+            <if test="params.endDate != 'null' and params.endDate != null and params.endDate.trim() != ''">
+                and sc.create_date <![CDATA[ <= ]]> #{params.endDate}
+            </if>
+
+        </where>
+        GROUP BY
+        dr_num
+        ORDER BY
+        number desc
+    </select>
+    <select id="list" resultType="com.dkha.dto.ScStudentsOutEverydayDetailsDTO">
+
+        select d.*,s.sc_stuname,s.sc_sex,s.sc_no,s.sc_idno,s.sc_registerdate
+        ,s.sc_status,s.sc_education,s.sc_photoimg,s.sc_rfcardid,s.sc_uwbid
+        ,s.sc_phonenum,s.sc_graduationdate
+
+        from sc_students_out_everyday_details d left join sc_students s on d.sc_stdid = s.sc_stdid
+        <where>
+            <if test="params.date != null and params.date.trim() != ''">
+                d.create_date = #{params.date}
+            </if>
+
+        </where>
+        ORDER BY d.create_date desc
+    </select>
+</mapper>

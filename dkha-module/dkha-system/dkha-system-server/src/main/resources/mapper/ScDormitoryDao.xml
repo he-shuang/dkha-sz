@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dkha.dao.ScDormitoryDao">
+
+    <resultMap type="com.dkha.entity.ScDormitoryEntity" id="scDormitoryMap">
+        <result property="drId" column="dr_id"/>
+        <result property="dfFloorid" column="df_floorid"/>
+        <result property="drNum" column="dr_num"/>
+        <result property="drCapacity" column="dr_capacity"/>
+        <result property="drState" column="dr_state"/>
+        <result property="dfPurpose" column="df_purpose"/>
+        <result property="dfIsfull" column="df_isfull"/>
+    </resultMap>
+    <select id="getById" resultType="com.dkha.entity.ScDormitoryEntity">
+        select d.*,d1.df_floorname as parentName from sc_dormitory d left join sc_dormitoryfloor d1 on  d.df_floorid = d1.df_floorid
+        where d.dr_id = #{id}
+
+    </select>
+    <select id="getByScNum" resultType="com.dkha.entity.ScDormitoryEntity">
+        SELECT * FROM sc_dormitory WHERE dr_num=#{scNum}
+    </select>
+    <select id="getAll" resultType="com.dkha.entity.ScDormitoryEntity">
+        SELECT * FROM sc_dormitory
+    </select>
+</mapper>

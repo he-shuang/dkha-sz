@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dkha.dao.ScCurrenthistoryDao">
+
+    <resultMap type="com.dkha.entity.ScCurrenthistoryEntity" id="scCurrenthistoryMap">
+        <result property="chId" column="ch_id"/>
+        <result property="chDevicesn" column="ch_devicesn"/>
+        <result property="chDeviceid" column="ch_deviceid"/>
+        <result property="chEcurrent" column="ch_ecurrent"/>
+        <result property="chColltime" column="ch_colltime"/>
+        <result property="chNum" column="ch_num"/>
+        <result property="chRoomid" column="ch_roomid"/>
+    </resultMap>
+    <select id="getByRoomId" resultType="com.dkha.entity.ScCurrenthistoryEntity">
+        SELECT
+        *
+        FROM
+        sc_currenthistory
+        WHERE
+        ch_roomid = #{roomId}
+        and ch_colltime >= #{startTime}
+        and ch_colltime &lt;= #{endTime}
+    </select>
+    <select id="getByTop" resultType="com.dkha.entity.ScCurrenthistoryEntity">
+             SELECT
+				ch_num,sum(ch_ecurrent)as ch_ecurrent,any_value(ch_roomid) as chRoomid,any_value(d.df_floorid) as floorid
+        FROM
+        sc_currenthistory
+        left join sc_dormitory d on sc_currenthistory.ch_roomid = d.dr_id
+        	where  to_days(ch_colltime) = to_days(now())
+				GROUP BY ch_num
+				ORDER BY ch_ecurrent desc
+        LIMIT 0,10
+    </select>
+</mapper>

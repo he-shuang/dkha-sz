@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dkha.dao.ScFaceverificationDao">
+
+    <resultMap type="com.dkha.entity.ScFaceverificationEntity" id="scFaceverificationMap">
+        <result property="fvId" column="fv_id"/>
+        <result property="equipmentId" column="equipment_id"/>
+        <result property="equipmentVerificationId" column="equipment_verification_id"/>
+        <result property="personCode" column="person_code"/>
+        <result property="verificationType" column="verification_type"/>
+        <result property="checkTime" column="check_time"/>
+        <result property="imageName" column="image_name"/>
+        <result property="recognitionName" column="recognition_name"/>
+        <result property="icCardNo" column="ic_card_no"/>
+        <result property="existImage" column="exist_image"/>
+        <result property="recordType" column="record_type"/>
+        <result property="warningTemperature" column="warning_temperature"/>
+        <result property="temperature" column="temperature"/>
+        <result property="createDate" column="create_date"/>
+        <result property="imageUrl" column="image_url"/>
+    </resultMap>
+
+    <select id="getMyList" resultType="com.dkha.entity.ScFaceverificationEntity">
+        select a.*,b.ae_devicename aeDevicename from sc_faceverification a inner join (select t1.fv_id from sc_faceverification t1
+
+        left join sc_aidooreight b1 on t1.equipment_id = b1.ae_id
+
+        where 1=1
+        <if test="deptId != null">
+           and t1.`equipment_id` IN (SELECT door_id FROM sc_dept_door_scope WHERE dept_id = #{deptId})
+        </if>
+        <if test="no != null and no != '' ">
+            AND person_code IN (SELECT CAST(id AS CHAR(50)) id FROM (SELECT sc_waid id,sc_empno n FROM sc_workersarchives UNION ALL SELECT sc_stdid id,sc_no n FROM sc_students) www WHERE n LIKE CONCAT('%',#{no},'%'))
+        </if>
+        <if test="type != null and type == 1 ">
+            and b1.ae_devicetype != 3
+        </if>
+        <if test="type != null and type == 2 ">
+            and b1.ae_devicetype = 3
+        </if>
+        <if test="aeId != 'null' and aeId != null and aeId.trim() != ''">
+            and  b1.ae_id = #{aeId}
+        </if>
+        <if test="recognitionName != '%null%' and recognitionName != null and recognitionName.trim() != ''">
+            and t1.recognition_name like #{recognitionName}
+        </if>
+        <if test="startDate != 'null' and startDate != null and startDate.trim() != ''">
+            and t1.create_date <![CDATA[ >= ]]> #{startDate}
+        </if>
+        <if test="endDate != 'null' and endDate != null and endDate.trim() != ''">
+            and t1.create_date <![CDATA[ <= ]]> #{endDate}
+        </if>
+        order by t1.create_date desc limit #{scol},#{ipagesize})b on a.fv_id=b.fv_id
+        left join sc_aidooreight b on a.equipment_id = b.ae_id
+
+        where 1=1
+
+
+        order by a.create_date desc
+    </select>
+
+    <select id="getMyCount" resultType="Long">
+        select count(1) total from sc_faceverification t1
+
+        left join sc_aidooreight b1 on t1.equipment_id = b1.ae_id
+
+        where 1=1
+        <if test="deptId != null">
+            and t1.`equipment_id` IN (SELECT door_id FROM sc_dept_door_scope WHERE dept_id = #{deptId})
+        </if>
+        <if test="no != null and no != '' ">
+            AND person_code IN (SELECT CAST(id AS CHAR(50)) id FROM (SELECT sc_waid id,sc_empno n FROM sc_workersarchives UNION ALL SELECT sc_stdid id,sc_no n FROM sc_students) www WHERE n LIKE CONCAT('%',#{no},'%'))
+        </if>
+
+        <if test="type != null and type == 1 ">
+            and b1.ae_devicetype != 3
+        </if>
+        <if test="type != null and type == 2 ">
+            and b1.ae_devicetype = 3
+        </if>
+        <if test="aeId != 'null' and aeId != null and aeId.trim() != ''">
+            and  b1.ae_id = #{aeId}
+        </if>
+        <if test="recognitionName != '%null%' and recognitionName != null and recognitionName.trim() != ''">
+            and t1.recognition_name like #{recognitionName}
+        </if>
+        <if test="startDate != 'null' and startDate != null and startDate.trim() != ''">
+            and t1.create_date <![CDATA[ >= ]]> #{startDate}
+        </if>
+        <if test="endDate != 'null' and endDate != null and endDate.trim() != ''">
+            and t1.create_date <![CDATA[ <= ]]> #{endDate}
+        </if>
+    </select>
+
+    <select id="selectDayCount"  resultType="java.lang.Integer">
+        select count(1) from sc_faceverification f
+         left join sc_aidooreight a on f.equipment_id = a.ae_id
+         where f.verification_type = #{type} and date(f.create_date) = date(#{date})
+        and (a.ae_devicetype = 1 or a.ae_devicetype = 2)
+    </select>
+
+    <select id="getLastData"  resultType="com.dkha.entity.ScFaceverificationEntity">
+       SELECT f.*
+        FROM sc_faceverification f LEFT JOIN sc_aidooreight a on f.equipment_id = a.ae_id
+          WHERE (a.ae_devicetype = 1 or a.ae_devicetype = 2)
+            and f.person_code = #{scStdid}
+            ORDER BY f.create_date desc LIMIT 1
+    </select>
+
+    <select id="getLimit"  resultType="com.dkha.dto.ScFaceverificationDTO">
+       SELECT f.* FROM sc_faceverification f LEFT JOIN sc_aidooreight a ON f.equipment_id = a.ae_id
+            WHERE (a.ae_devicetype = 1 OR a.ae_devicetype = 2) ORDER BY f.create_date desc LIMIT 10
+    </select>
+
+</mapper>

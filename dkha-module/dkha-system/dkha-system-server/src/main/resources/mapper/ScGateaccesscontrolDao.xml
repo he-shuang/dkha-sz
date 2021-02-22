@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dkha.dao.ScGateaccesscontrolDao">
+
+    <resultMap type="com.dkha.entity.ScGateaccesscontrolEntity" id="scGateaccesscontrolMap">
+        <result property="gacId" column="gac_id"/>
+        <result property="gacSn" column="gac_sn"/>
+        <result property="gacIotype" column="gac_iotype"/>
+        <result property="gacOpentime" column="gac_opentime"/>
+        <result property="gacName" column="gac_name"/>
+        <result property="gacPersonimg" column="gac_personimg"/>
+        <result property="gacDeviceadd" column="gac_deviceadd"/>
+        <result property="gacTemperature" column="gac_temperature"/>
+    </resultMap>
+
+
+</mapper>

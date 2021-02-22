@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dkha.dao.ScAidooreightPersonlistDao">
+
+    <resultMap type="com.dkha.entity.ScAidooreightPersonlistEntity" id="scAidooreightPersonlistMap">
+        <result property="apId" column="ap_id"/>
+        <result property="aeId" column="ae_id"/>
+        <result property="aeSerialnumber" column="ae_serialnumber"/>
+        <result property="username" column="username"/>
+        <result property="userid" column="userid"/>
+        <result property="userno" column="userno"/>
+        <result property="sex" column="sex"/>
+        <result property="photoimg" column="photoimg"/>
+        <result property="persontype" column="persontype"/>
+        <result property="updateDate" column="update_date"/>
+    </resultMap>
+    <insert id="insertBatchAndUpdate">
+        INSERT INTO `sc_aidooreight_personlist` ( `ap_id`,`ae_id`, `ae_serialnumber`, `username`, `userid`, `userno`, `sex`, `photoimg`, `persontype`, `update_date` )
+        VALUES
+            <foreach collection ="list" item="item" index= "index" separator =",">
+                (
+                #{item.apId}, #{item.aeId}, #{item.aeSerialnumber}, #{item.username}, #{item.userid}, #{item.userno}, #{item.sex}
+                , #{item.photoimg}, #{item.persontype}, #{item.updateDate}
+                )
+            </foreach>
+             ON DUPLICATE KEY UPDATE
+                ae_serialnumber = VALUES(ae_serialnumber),
+                username = VALUES(username),
+                userno = VALUES(userno),
+                sex = VALUES(sex),
+                photoimg = VALUES(photoimg),
+                persontype = VALUES(persontype),
+                update_date = VALUES(update_date)
+    </insert>
+
+
+</mapper>

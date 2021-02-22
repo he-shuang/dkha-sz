@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dkha.dao.ScRoomcurrentEverydayDao">
+
+    <resultMap type="com.dkha.entity.ScRoomcurrentEverydayEntity" id="scRoomcurrentEverydayMap">
+        <result property="id" column="id"/>
+        <result property="drNum" column="dr_num"/>
+        <result property="alarmDate" column="alarm_date"/>
+        <result property="num" column="num"/>
+        <result property="updateDate" column="update_date"/>
+    </resultMap>
+    <select id="roomCurrentAlarm" resultType="com.dkha.entity.ScRoomcurrentEverydayEntity">
+        SELECT * FROM sc_roomcurrent_everyday WHERE alarm_date = DATE(NOW()) ORDER BY num desc LIMIT 10
+    </select>
+    <select id="queryEveryDayEntiyByRoomDate" resultType="com.dkha.entity.ScRoomcurrentEverydayEntity">
+        	select * from sc_roomcurrent_everyday where alarm_date =#{alarmdate}  and dr_roomid=#{drroomid}
+    </select>
+
+
+</mapper>

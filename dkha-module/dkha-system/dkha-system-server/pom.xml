@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.dkha</groupId>
+        <!--新建时修改模块名称-->
+        <artifactId>dkha-system</artifactId>
+        <version>1.0.0</version>
+    </parent>
+
+    <!--新建时修改模块名称-->
+    <artifactId>dkha-system-server</artifactId>
+    <packaging>jar</packaging>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.dkha</groupId>
+            <!--新建时修改模块名称-->
+            <artifactId>dkha-system-client</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.dkha</groupId>
+            <artifactId>dkha-commons-tools</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-websocket</artifactId>
+        </dependency>
+
+
+        <dependency>
+            <groupId>com.dkha</groupId>
+            <artifactId>dkha-commons-log</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.dkha</groupId>
+            <artifactId>dkha-commons-mybatis</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.dkha</groupId>
+            <artifactId>dkha-commons-entity</artifactId>
+        </dependency>
+<!--        5寸门禁多数据源配置 深圳使用-->
+        <dependency>
+            <groupId>com.dkha</groupId>
+            <artifactId>dkha-commons-dynamic-datasource</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.dkha</groupId>
+            <artifactId>dkha-commons-fileupload</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context-support</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.8.6</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>school-${project.artifactId}</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <skipTests>true</skipTests>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <!-- 在maven进行package的时候执行-->
+                        <phase>package</phase>
+                        <configuration>
+                            <tasks>
+                                <!--jar包保存位置 -->
+                                <copy todir="../../../target">
+                                    <!--antrun自动生成的配置文件的保存位置，这里默认是父项目的target文件夹 -->
+                                    <fileset dir="${project.build.directory}">
+                                        <include name="*.jar" />
+                                    </fileset>
+                                </copy>
+                            </tasks>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

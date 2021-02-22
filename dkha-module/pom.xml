@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>com.dkha</groupId>
+		<artifactId>dkha</artifactId>
+		<version>3.0.0</version>
+	</parent>
+
+	<groupId>com.dkha</groupId>
+	<artifactId>dkha-module</artifactId>
+	<packaging>pom</packaging>
+
+	<modules>
+		<module>dkha-thermal-imaging</module>
+		<module>dkha-job</module>
+		<module>dkha-pirlight</module>
+		<module>dkha-message</module>
+		<module>dkha-activiti</module>
+		<module>dkha-api</module>
+		<module>dkha-seata</module>
+		<module>dkha-current-collection</module>
+		<module>dkha-gateway-collection</module>
+		<module>dkha-system</module>
+		<module>dkha-uwbhandler</module>
+		<module>dkha-uwblable</module>
+		<module>dkha-eightdoor</module>
+		<module>dkha-uwblight</module>
+        <module>dkha-timinglight</module>
+
+    </modules>
+
+</project>

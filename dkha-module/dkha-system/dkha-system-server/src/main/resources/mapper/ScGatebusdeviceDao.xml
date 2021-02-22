@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dkha.dao.ScGatebusdeviceDao">
+
+    <resultMap type="com.dkha.entity.ScGatebusdeviceEntity" id="scGatebusdeviceMap">
+        <result property="gwId" column="gw_id"/>
+        <result property="mbdId" column="mbd_id"/>
+        <result property="gbdId" column="gbd_id"/>
+        <result property="gbdAddr" column="gbd_addr"/>
+        <result property="gbdDevicetype" column="gbd_devicetype"/>
+        <result property="gbdDevicesn" column="gbd_devicesn"/>
+        <result property="gbdGroup" column="gbd_group"/>
+    </resultMap>
+    <delete id="deleteByGateId">
+        DELETE FROM sc_gatebusdevice WHERE gbd_id=#{gbdId}
+    </delete>
+    <select id="findAllById" resultType="com.dkha.dto.ScGatebusdeviceDTO">
+        SELECT * FROM sc_gatebusdevice WHERE gbd_id=#{id}
+    </select>
+
+
+</mapper>

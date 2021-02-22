@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dkha.dao.ScOccupancyhistoryDao">
+
+    <resultMap type="com.dkha.entity.ScOccupancyhistoryEntity" id="scOccupancyhistoryMap">
+        <result property="ohId" column="oh_id"/>
+        <result property="drId" column="dr_id"/>
+        <result property="stuname" column="stuname"/>
+        <result property="stuno" column="stuno"/>
+        <result property="stuid" column="stuid"/>
+        <result property="checkinDate" column="checkin_date"/>
+        <result property="checkoutDate" column="checkout_date"/>
+        <result property="creator" column="creator"/>
+    </resultMap>
+
+
+</mapper>

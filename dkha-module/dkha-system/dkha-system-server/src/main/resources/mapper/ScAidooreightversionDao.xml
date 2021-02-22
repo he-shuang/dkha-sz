@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dkha.dao.ScAidooreightversionDao">
+
+    <resultMap type="com.dkha.entity.ScAidooreightversionEntity" id="scAidooreightversionMap">
+        <result property="aevId" column="aev_id"/>
+        <result property="aevPackname" column="aev_packname"/>
+        <result property="aevVersion" column="aev_version"/>
+        <result property="aevVersioncode" column="aev_versioncode"/>
+        <result property="aevNote" column="aev_note"/>
+        <result property="createDate" column="create_date"/>
+        <result property="updatetotal" column="updatetotal"/>
+        <result property="lastUpdatetime" column="last_updatetime"/>
+        <result property="aevUpdatefilepath" column="aev_updatefilepath"/>
+        <result property="aeMainboard" column="ae_mainboard"/>
+    </resultMap>
+<select id="getLastVersionByType" parameterType="int" resultType="com.dkha.entity.ScAidooreightversionEntity">
+  select * from sc_aidooreightversion where ae_mainboard=#{mainboard} order by create_date desc  limit 0,1
+</select>
+
+</mapper>

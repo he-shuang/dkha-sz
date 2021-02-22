@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dkha.dao.ScAidoorfivePersonlistDao">
+
+    <resultMap type="com.dkha.entity.ScAidoorfivePersonlistEntity" id="scAidoorfivePersonlistMap">
+        <result property="apId" column="ap_id"/>
+        <result property="serial" column="serial"/>
+        <result property="password" column="password"/>
+        <result property="userId" column="user_id"/>
+        <result property="username" column="username"/>
+        <result property="userid" column="userid"/>
+        <result property="userno" column="userno"/>
+        <result property="sex" column="sex"/>
+        <result property="photoimg" column="photoimg"/>
+        <result property="updateDate" column="update_date"/>
+    </resultMap>
+
+    <select id="getPersonNum" resultType="java.lang.Long">
+        SELECT COUNT(*) FROM sc_aidoorfive_personlist
+        WHERE serial=#{fSerial} AND password=#{fPassword}
+    </select>
+
+</mapper>

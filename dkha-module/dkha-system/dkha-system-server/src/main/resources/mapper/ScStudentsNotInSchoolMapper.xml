@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dkha.dao.ScStudentsNotInSchoolDao">
+
+    <resultMap type="com.dkha.entity.ScStudentsNotInSchoolEntity" id="scScStudentsNotInSchoolEntityMap">
+        <result property="id" column="id"/>
+        <result property="scStuname" column="sc_stuname"/>
+        <result property="scNo" column="sc_no"/>
+        <result property="scPhonenum" column="sc_phonenum"/>
+        <result property="scSchool" column="sc_school"/>
+        <result property="drNum" column="dr_num"/>
+        <result property="leaveDoorTime" column="leave_door_time"/>
+        <result property="leaveSchoolTime" column="leave_school_time"/>
+        <result property="date" column="date"/>
+    </resultMap>
+
+    <select id="findPage" resultType="com.dkha.entity.ScStudentsNotInSchoolEntity">
+        SELECT * FROM sc_students_not_in_school
+        where 1=1
+        <if test="params.scStuname != null and params.scStuname != '' " >
+            and sc_stuname like #{params.scStuname}
+        </if>
+        <if test="params.scNo != null and params.scNo != '' " >
+            and sc_no like #{params.scNo}
+        </if>
+        <if test="params.drNum != null and params.drNum != '' " >
+            and dr_num like #{params.drNum}
+        </if>
+        <if test="params.scSchool != null and params.scSchool != '' " >
+            and sc_school = #{params.scSchool}
+        </if>
+        <if test="params.date != null and params.date != '' " >
+            and date = #{params.date}
+        </if>
+        order by `date` desc,sc_school desc,dr_num desc
+    </select>
+    <select id="getInSchoolRecord" resultType="map">
+        SELECT DISTINCT sc_no FROM sc_faceverification f
+        LEFT JOIN sc_students s ON f.person_code=s.sc_stdid
+        LEFT JOIN sc_aidooreight a ON f.equipment_id=a.ae_id
+        WHERE 1=1 AND a.ae_signtype=1 AND f.person_code=s.sc_stdid AND f.create_date >= #{startTime}
+        AND f.create_date &lt;= #{endTime}
+    </select>
+    <select id="getStudents" resultType="com.dkha.entity.ScStudentsEntity">
+        SELECT * FROM sc_students WHERE sc_no NOT IN
+        <foreach item="item" collection="list" separator="," open="(" close=")" index="">
+            #{item}
+        </foreach>
+    </select>
+    <select id="getGoOutMsg" resultType="java.util.Map">
+        SELECT s.sc_stuname scStuname,sc_no scNo,s.sc_stdid scStdid,s.sc_phonenum scPhonenum,s.sc_photoimg scPhotoimg,s.sc_school scSchool,
+        MAX(CASE a.ae_devicetype WHEN 3 THEN f.create_date ELSE null END) leaveDoorTime,
+        MAX(CASE a.ae_devicetype WHEN 2 THEN f.create_date ELSE null END) leaveSchoolTime
+        FROM sc_faceverification f
+        LEFT JOIN sc_students s ON f.person_code=s.sc_stdid
+        LEFT JOIN sc_aidooreight a ON f.equipment_id=a.ae_id
+        WHERE 1=1 AND a.ae_signtype=2  AND f.person_code=s.sc_stdid	AND f.create_date LIKE '%${currentDate}%' AND s.sc_no =#{scNo}
+    </select>
+
+</mapper>

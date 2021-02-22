@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dkha.dao.ScDormitoryfloorDao">
+
+    <resultMap type="com.dkha.entity.ScDormitoryfloorEntity" id="scDormitoryfloorMap">
+        <result property="dfFloorid" column="df_floorid"/>
+        <result property="dfFloorname" column="df_floorname"/>
+        <result property="dfParentid" column="df_parentid"/>
+        <result property="dfType" column="df_type"/>
+        <result property="dfOrder" column="df_order"/>
+        <result property="creator" column="creator"/>
+        <result property="createDate" column="create_date"/>
+        <result property="updater" column="updater"/>
+        <result property="updateDate" column="update_date"/>
+        <result property="dfPurpose" column="df_purpose"/>
+        <result property="leaf" column="leaf"/>
+    </resultMap>
+    <select id="getList" resultMap="scDormitoryfloorMap">
+        select * from sc_dormitoryfloor
+        <where>
+            <if test="pid != null and pid.trim() != ''">
+                df_parentid = #{pid}
+            </if>
+            <if test="dfPurposes != null and dfPurposes.size > 0 ">
+                and df_purpose in
+                <foreach item="item" collection="dfPurposes" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+        order by df_order
+    </select>
+
+
+    <select id="getByPId" resultMap="scDormitoryfloorMap">
+        select t1.*, (select t2.df_floorname from sc_dormitoryfloor t2 where t2.df_floorid=t1.df_parentid) parentName from sc_dormitoryfloor t1 where t1.df_floorid = #{value}
+    </select>
+
+
+    <select id="getCountByPid" resultType="java.lang.Integer">
+        select count(*) from sc_dormitoryfloor where df_parentid = #{value}
+    </select>
+
+
+    <select id="getTreeList" resultType="java.util.Map">
+        select df_floorid, df_parentid, df_floorname,df_type,df_purpose from sc_dormitoryfloor
+         <if test="dfPurpose != null and dfPurpose != -1">
+         where df_purpose = #{dfPurpose}
+         </if>
+         order by df_order
+    </select>
+
+    <select id="roleTree" resultType="java.util.Map">
+        select df_floorid, df_parentid, df_floorname,df_type,df_purpose from sc_dormitoryfloor
+        <if test="dfPurposes != null and dfPurposes.size > 0 ">
+            where df_purpose in
+            <foreach item="item" collection="dfPurposes" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+         order by df_order
+    </select>
+
+    <select id="findName" resultType="java.lang.String">
+        select df_floorname from sc_dormitoryfloor where df_floorid=#{s}
+    </select>
+
+
+</mapper>

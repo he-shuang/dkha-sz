@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dkha.dao.ScStudentsDao">
+
+    <resultMap type="com.dkha.entity.ScStudentsEntity" id="scStudentsMap">
+        <result property="scStdid" column="sc_stdid"/>
+        <result property="scStuname" column="sc_stuname"/>
+        <result property="scSex" column="sc_sex"/>
+        <result property="scNo" column="sc_no"/>
+        <result property="scIdno" column="sc_idno"/>
+        <result property="scRegisterdate" column="sc_registerdate"/>
+        <result property="scStatus" column="sc_status"/>
+        <result property="scEducation" column="sc_education"/>
+        <result property="scPhotoimg" column="sc_photoimg"/>
+        <result property="scRfcardid" column="sc_rfcardid"/>
+        <result property="scUwbid" column="sc_uwbid"/>
+        <result property="scPhonenum" column="sc_phonenum"/>
+        <result property="scGraduationdate" column="sc_graduationdate"/>
+        <result property="creator" column="creator"/>
+        <result property="createDate" column="create_date"/>
+        <result property="updater" column="updater"/>
+        <result property="updateDate" column="update_date"/>
+    </resultMap>
+    <select id="getByScNos" resultType="com.dkha.entity.ScStudentsEntity">
+        SELECT
+        *
+        FROM
+        sc_students
+        WHERE
+        sc_no IN
+        <foreach item="item" collection="list" separator="," open="(" close=")" index="">
+            #{item}
+        </foreach>
+        ORDER BY  FIELD( sc_no,
+        <foreach item="item" collection="list" separator="," index="">
+            #{item}
+        </foreach>
+        )
+
+    </select>
+    <select id="getByScNo" resultType="com.dkha.entity.ScStudentsEntity">
+        SELECT
+        *
+        FROM
+        sc_students
+        WHERE
+        sc_no=#{scNo}
+
+    </select>
+
+    <select id="getStudentsInfo" resultType="com.dkha.entity.ScStudentsEntity">
+        select * from sc_students
+        <if test="flag == 1">
+            where sc_stdid not in
+            <foreach item="item" collection="pIds" separator="," open="(" close=")" index="">
+             #{item}
+            </foreach>
+        </if>
+    </select>
+
+    <select id="selectDoorByIds" resultType="map">
+        SELECT s.*,d.* FROM sc_students s
+        LEFT JOIN sc_dormitoryperson p on s.sc_stdid = p.sc_stdid
+        LEFT JOIN sc_dormitory d on p.dr_id = d.dr_id
+        where s.sc_stdid in
+        <foreach item="item" collection="ids" separator="," open="(" close=")" index="">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="selectWorkerByIds" resultType="map">
+        SELECT *FROM sc_workersarchives
+        where sc_waid in
+        <foreach item="item" collection="ids" separator="," open="(" close=")" index="">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="getAllId" resultType="string">
+        SELECT sc_stdid FROM sc_students
+    </select>
+
+    <select id="getUserId" resultType="integer">
+        SELECT NEXTVAL('FiveDoorSeq')
+    </select>
+
+</mapper>

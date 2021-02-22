@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dkha.dao.ScImportantDeviceDao">
+
+    <resultMap type="com.dkha.entity.ScImportantDeviceEntity" id="scImportantDeviceMap">
+        <result property="imId" column="im_id"/>
+        <result property="imDevicesn" column="im_devicesn"/>
+        <result property="imDevicename" column="im_devicename"/>
+        <result property="imDevicetype" column="im_devicetype"/>
+        <result property="imStatus" column="im_status"/>
+        <result property="imSetupdate" column="im_setupdate"/>
+        <result property="imExpirydate" column="im_expirydate"/>
+        <result property="imIpgateway" column="im_ipgateway"/>
+        <result property="imSetupaddr" column="im_setupaddr"/>
+        <result property="dfFloorid" column="df_floorid"/>
+        <result property="remark" column="remark"/>
+        <result property="uwb" column="uwb"/>
+    </resultMap>
+    <select id="getPages" resultType="com.dkha.entity.ScImportantDeviceEntity">
+       /*select *,
+           GET_NAME (REVERSE(SUBSTRING_INDEX(REVERSE(im_setupaddr),',',1))) AS imSetupaddrName
+           from sc_important_device  where 1=1 order by   im_id,im_setupdate desc*/
+           			 select t.*,
+        (
+        SELECT
+        GROUP_CONCAT( df_floorname SEPARATOR ' / ')
+        FROM
+        sc_dormitoryfloor
+        WHERE
+        FIND_IN_SET( df_floorid, t.`im_setupaddr` )) AS imSetupaddrName
+         from sc_important_device t
+
+        <where>
+            <if test="params.imDevicename != null and params.imDevicename != ''">
+                t.im_devicename like #{params.imDevicename}
+            </if>
+            <if test="params.imStatus != null and params.imStatus != ''">
+                and t.im_status = #{params.imStatus}
+            </if>
+        </where>
+
+         order by   im_id,im_setupdate desc
+    </select>
+
+</mapper>

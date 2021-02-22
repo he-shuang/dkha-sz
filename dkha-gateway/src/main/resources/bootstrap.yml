@@ -1,0 +1,37 @@
+
+spring:
+  application:
+    name: dkha-gateway-server
+  #环境 dev|test|prod
+  profiles:
+    active: dev
+  messages:
+    encoding: UTF-8
+    basename: i18n/messages_common
+
+logging:
+  level:
+    com.alibaba.nacos.client.*: WARN
+swagger: #聚合文档配置
+  routes:
+    - name: 认证服务
+      location: /auth
+    - name: Admin服务
+      location: /sys
+    - name: OSS服务
+      location: /oss
+    - name: 消息服务
+      location: /message
+    - name: 工作流服务
+      location: /activiti
+    - name: 定时任务服务
+      location: /job
+    - name: APP流服务
+      location: /api
+    - name: 电流采集服务
+      location: /current-collection
+    - name: 网关数据采集服务
+      location: /gateway-collection
+    - name: 应用服务
+      location: /system
+

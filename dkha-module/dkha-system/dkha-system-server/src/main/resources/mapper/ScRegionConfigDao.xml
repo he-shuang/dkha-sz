@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dkha.dao.ScRegionConfigDao">
+
+    <resultMap type="com.dkha.entity.ScRegionConfigEntity" id="scRegionConfigMap">
+        <result property="rcId" column="rc_id"/>
+        <result property="rcName" column="rc_name"/>
+        <result property="rcNo" column="rc_no"/>
+        <result property="rcAddress" column="rc_address"/>
+        <result property="rcFloor" column="rc_floor"/>
+        <result property="rcFenceId" column="rc_fence_id"/>
+        <result property="rcFenceName" column="rc_fence_name"/>
+        <result property="rcType" column="rc_type"/>
+        <result property="createDate" column="create_date"/>
+        <result property="updateDate" column="update_date"/>
+    </resultMap>
+    <select id="pageList" resultType="com.dkha.entity.ScRegionConfigEntity">
+            SELECT
+                t.*,
+                (
+                SELECT
+                    GROUP_CONCAT( df_floorname SEPARATOR ' / ')
+                FROM
+                    sc_dormitoryfloor
+                WHERE
+                FIND_IN_SET( df_floorid, t.`rc_floor` )) AS rcFloorName
+
+            FROM
+                sc_region_config t
+               <if test="params.rcName != null and params.rcName != ''">
+                  where t.rc_name like #{params.rcName}
+               </if>
+    </select>
+
+
+</mapper>

@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dkha.dao.ScDormitorypersonDao">
+
+    <resultMap type="com.dkha.dto.ScDormitorypersonInfoDTO" id="baseMap">
+        <result property="drId" column="dr_id"/>
+        <result property="dfFloorid" column="df_floorid"/>
+        <result property="drNum" column="dr_num"/>
+        <result property="drCapacity" column="dr_capacity"/>
+        <result property="drState" column="dr_state"/>
+        <result property="dfPurpose" column="df_purpose"/>
+        <result property="dfIsfull" column="df_isfull"/>
+
+        <collection property="dormitorypersonDTOS" ofType="com.dkha.dto.ScDormitorypersonDetailsDTO">
+            <id property="dpId" column="dp_id"/>
+            <result property="scStdid" column="sc_stdid"/>
+            <result property="drOccupancydate" column="dr_occupancydate"/>
+            <result property="scStuname" column="sc_stuname"/>
+            <result property="scSex" column="sc_sex"/>
+            <result property="scNo" column="sc_no"/>
+            <result property="scIdno" column="sc_idno"/>
+            <result property="scRegisterdate" column="sc_registerdate"/>
+            <result property="scStatus" column="sc_status"/>
+            <result property="scEducation" column="sc_education"/>
+            <result property="scPhotoimg" column="sc_photoimg"/>
+            <result property="scRfcardid" column="sc_rfcardid"/>
+            <result property="scUwbid" column="sc_uwbid"/>
+            <result property="scPhonenum" column="sc_phonenum"/>
+            <result property="scGraduationdate" column="sc_graduationdate"/>
+            <result property="creator" column="creator"/>
+            <result property="createDate" column="create_date"/>
+            <result property="updater" column="updater"/>
+            <result property="updateDate" column="update_date"/>
+            <result property="isOut" column="is_out"/>
+        </collection>
+    </resultMap>
+
+
+    <select id="findPage" resultMap="baseMap" >
+        SELECT t.*,t1.*,t3.* FROM sc_dormitory t left join sc_dormitoryperson t1 on t.dr_id = t1.dr_id
+        left join sc_dormitoryfloor t2 on t.df_floorid = t2.df_floorid
+        left join sc_students t3 on t1.sc_stdid = t3.sc_stdid
+        <if test="params.type == 0">
+            WHERE t2.df_parentid = #{params.floorId}
+        </if>
+        <if test="params.type == 1">
+            WHERE t2.df_floorid = #{params.floorId}
+        </if>
+
+        <if test="params.type == 2">
+            WHERE t.dr_id = #{params.floorId}
+        </if>
+        <if test="params.scStuname != null and params.scStuname != ''">
+            and t3.sc_stuname like #{params.scStuname}
+        </if>
+        <if test="params.scNo != null and params.scNo != ''">
+            and t3.sc_no like #{params.scNo}
+        </if>
+
+    </select>
+
+
+
+    <select id="list" resultMap="baseMap" >
+        SELECT t.*,t1.*,t3.* FROM sc_dormitory t left join sc_dormitoryperson t1 on t.dr_id = t1.dr_id
+        left join sc_dormitoryfloor t2 on t.df_floorid = t2.df_floorid
+        left join sc_students t3 on t1.sc_stdid = t3.sc_stdid
+        <if test="params.type == 0">
+            WHERE t2.df_parentid = #{params.floorId}
+        </if>
+        <if test="params.type == 1">
+            WHERE t2.df_floorid = #{params.floorId}
+        </if>
+
+        <if test="params.type == 2">
+            WHERE t.dr_id = #{params.floorId}
+        </if>
+        <if test="params.scStuname != null and params.scStuname != ''">
+            and t3.sc_stuname like #{params.scStuname}
+        </if>
+        <if test="params.scNo != null and params.scNo != ''">
+            and t3.sc_no like #{params.scNo}
+        </if>
+        order by cast(t.dr_num as signed) asc
+
+
+    </select>
+
+    <select id="countByFloorId" resultType="int" >
+       SELECT  count(t.dp_id)  from sc_dormitoryperson t
+        LEFT JOIN sc_dormitory t1 ON t.dr_id = t1.dr_id
+        LEFT JOIN sc_dormitoryfloor t2 ON t1.df_floorid = t2.df_floorid
+        WHERE 1=1
+        <if test="floorId != null and floorId != ''">
+            and t2.df_floorid = #{floorId}
+        </if>
+        <if test="isOut != null and isOut != ''">
+            and t.is_out=#{isOut}
+        </if>
+    </select>
+    <select id="countBySex" resultType="int" >
+        select COUNT(1)
+        from 	sc_dormitoryperson sd
+        LEFT join sc_students sc on sc.sc_stdid = sd.sc_stdid
+        WHERE 1=1
+        <if test="sex != null and sex != ''">
+            and sc.sc_sex=#{sex}
+        </if>
+    </select>
+    <select id="getByDrNum" resultType="com.dkha.entity.FvScDeviceEntity">
+        select f_serial,f_password from scweb.fv_sc_device where f_name=#{drNum}
+    </select>
+
+    <select id="exportInfoExcel" resultType="com.dkha.excel.ScDormitorypersonExcel" >
+        SELECT
+            t.sc_stuname,
+            t.sc_phonenum,
+            t.sc_stdid,
+            t.sc_school,
+            t4.dict_label AS scSchool,
+            t2.dr_num,
+            t3.df_floorname
+        FROM
+            sc_students t
+            LEFT JOIN sc_dormitoryperson t1 ON t.sc_stdid = t1.sc_stdid
+            LEFT JOIN sc_dormitory t2 ON t1.dr_id = t2.dr_id
+            LEFT JOIN sc_dormitoryfloor t3 ON t2.df_floorid = t3.df_floorid
+            LEFT JOIN sys_dict_data t4 ON t4.dict_value = t.sc_school
+            AND t4.dict_type_id IN ( SELECT id FROM sys_dict_type t5 WHERE t5.dict_type = 'school' )
+        WHERE
+            t1.is_out = 1
+        ORDER BY
+            t4.dict_value desc,
+            cast( t2.dr_num AS signed )
+    </select>
+
+    <select id="getDictBySchool" resultType="string" >
+        SELECT d.dict_label
+        FROM sys_dict_data d
+        LEFT JOIN
+        sys_dict_type t
+        ON d.dict_type_id=t.id
+        WHERE t.dict_type='school'
+        AND d.dict_value=#{scSchool}
+    </select>
+
+    <select id="getDrNumBySn" resultType="string">
+        SELECT d.dr_num dr_num FROM sc_dormitoryperson dp
+        LEFT JOIN sc_students s ON dp.sc_stdid = s.sc_stdid
+        LEFT JOIN sc_dormitory d ON dp.dr_id = d.dr_id
+        WHERE s.sc_no =#{scNo}
+    </select>
+</mapper>

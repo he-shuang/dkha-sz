@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>com.dkha</groupId>
+		<artifactId>dkha</artifactId>
+		<version>3.0.0</version>
+	</parent>
+
+	<groupId>com.dkha</groupId>
+	<artifactId>dkha-commons</artifactId>
+	<packaging>pom</packaging>
+
+	<modules>
+	    <module>dkha-commons-dependencies</module>
+		<module>dkha-commons-tools</module>
+		<module>dkha-commons-swagger</module>
+		<module>dkha-commons-lock</module>
+		<module>dkha-commons-xxl-job</module>
+		<module>dkha-commons-mybatis</module>
+		<module>dkha-commons-security</module>
+		<module>dkha-commons-log</module>
+		<module>dkha-commons-dynamic-datasource</module>
+		<module>dkha-commons-elasticsearch</module>
+		<module>dkha-commons-fileupload</module>
+		<module>dkha-commons-entity</module>
+	</modules>
+
+</project>

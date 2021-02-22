@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dkha.dao.ScDfmapbindingDao">
+
+    <resultMap type="com.dkha.entity.ScDfmapbindingEntity" id="scDfmapbindingMap">
+        <result property="id" column="id"/>
+        <result property="dfFloorid" column="df_floorid"/>
+        <result property="mapId" column="map_id"/>
+        <result property="floor" column="floor"/>
+    </resultMap>
+
+    <select id="getByDfFloorid" resultType="com.dkha.entity.ScDfmapbindingEntity">
+        select * from sc_dfmapbinding t1 where t1.df_floorid = #{dfFloorid} limit 1
+    </select>
+
+</mapper>

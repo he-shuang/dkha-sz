@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dkha.dao.ScGatewaydcDao">
+
+    <resultMap type="com.dkha.entity.ScGatewaydcEntity" id="scGatewaydcMap">
+        <result property="gwId" column="gw_id"/>
+        <result property="gwSn" column="gw_sn"/>
+        <result property="gwName" column="gw_name"/>
+        <result property="gwState" column="gw_state"/>
+        <result property="gwSetupdate" column="gw_setupdate"/>
+        <result property="gwExpirydate" column="gw_expirydate"/>
+        <result property="gwIpgateway" column="gw_ipgateway"/>
+        <result property="gwSetupaddr" column="gw_setupaddr"/>
+        <result property="gwUwbaddr" column="gw_uwbaddr"/>
+        <result property="gwUwbnum" column="gw_uwbnum"/>
+        <result property="dfFloorid" column="df_floorid"/>
+    </resultMap>
+    <select id="getPages" resultType="com.dkha.entity.ScGatewaydcEntity">
+     /*  select *,
+           GET_NAME (REVERSE(SUBSTRING_INDEX(REVERSE(gw_setupaddr),',',1))) AS gwSetupaddrName
+           from sc_gatewaydc  where 1=1 order by   gw_id,gw_setupdate desc*/
+        select t.*,
+        (
+        SELECT
+        GROUP_CONCAT( df_floorname SEPARATOR ' / ')
+        FROM
+        sc_dormitoryfloor
+        WHERE
+        FIND_IN_SET( df_floorid, t.`gw_setupaddr` )) AS gwSetupaddrName
+         from sc_gatewaydc t
+				 <where>
+                     <if test="params.gwName != null and params.gwName != ''">
+                            t.gw_name like #{params.gwName}
+                     </if>
+                     <if test="params.gwState != null and params.gwState != ''">
+                         and t.gw_state = #{params.gwState}
+                     </if>
+                 </where>
+
+				  order by   t.gw_id,t.gw_setupdate desc
+    </select>
+</mapper>

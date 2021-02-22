@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dkha.dao.ScGateguarddcDao">
+
+    <resultMap type="com.dkha.entity.ScGateguarddcEntity" id="scGateguarddcMap">
+        <result property="ggdId" column="ggd_id"/>
+        <result property="ggdSn" column="ggd_sn"/>
+        <result property="ggdName" column="ggd_name"/>
+        <result property="ggdType" column="ggd_type"/>
+        <result property="ggdStatus" column="ggd_status"/>
+        <result property="ggdSetupdate" column="ggd_setupdate"/>
+        <result property="ggdExpirydate" column="ggd_expirydate"/>
+        <result property="ggdIpgateway" column="ggd_ipgateway"/>
+        <result property="ggdSetupaddr" column="ggd_setupaddr"/>
+        <result property="dfFloorid" column="df_floorid"/>
+        <result property="drId" column="dr_id"/>
+    </resultMap>
+
+
+</mapper>

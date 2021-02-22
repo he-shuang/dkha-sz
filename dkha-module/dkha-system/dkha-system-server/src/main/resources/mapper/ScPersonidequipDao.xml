@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dkha.dao.ScPersonidequipDao">
+
+    <resultMap type="com.dkha.entity.ScPersonidequipEntity" id="scPersonidequipMap">
+        <result property="pieId" column="pie_id"/>
+        <result property="pieEquipsn" column="pie_equipsn"/>
+        <result property="pieIpaddr" column="pie_ipaddr"/>
+        <result property="pieSetupaddr" column="pie_setupaddr"/>
+        <result property="pieDevicename" column="pie_devicename"/>
+        <result property="pieStatus" column="pie_status"/>
+        <result property="pieSetupdate" column="pie_setupdate"/>
+        <result property="pieExpirydate" column="pie_expirydate"/>
+        <result property="dfFloorid" column="df_floorid"/>
+        <result property="pieIsinitial" column="pie_isinitial"/>
+    </resultMap>
+
+
+</mapper>

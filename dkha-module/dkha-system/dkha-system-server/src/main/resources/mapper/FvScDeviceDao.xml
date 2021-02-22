@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.dkha.dao.FvScDeviceDao">
+
+    <resultMap type="com.dkha.entity.FvScDeviceEntity" id="fvScDeviceMap">
+        <result property="fId" column="f_id"/>
+        <result property="fAgentId" column="f_agent_id"/>
+        <result property="fName" column="f_name"/>
+        <result property="fAddTime" column="f_add_time"/>
+        <result property="fCommunityId" column="f_community_id"/>
+        <result property="fBuildingId" column="f_building_id"/>
+        <result property="fChannelId" column="f_channel_id"/>
+        <result property="fParamsSet" column="f_params_set"/>
+        <result property="fUnlockState" column="f_unlock_state"/>
+        <result property="fLockMode" column="f_lock_mode"/>
+        <result property="fLockDelay" column="f_lock_delay"/>
+        <result property="fSerial" column="f_serial"/>
+        <result property="fPassword" column="f_password"/>
+        <result property="fSerialNumber" column="f_serial_number"/>
+        <result property="fSupportFace" column="f_support_face"/>
+        <result property="fDeviceNo" column="f_device_no"/>
+        <result property="fBtkeyType" column="f_btkey_type"/>
+        <result property="fBtkey" column="f_btkey"/>
+        <result property="fMac" column="f_mac"/>
+        <result property="fWanDhcp" column="f_wan_dhcp"/>
+        <result property="fWanIp" column="f_wan_ip"/>
+        <result property="fWanMask" column="f_wan_mask"/>
+        <result property="fWanGateway" column="f_wan_gateway"/>
+        <result property="fWifiSsid" column="f_wifi_ssid"/>
+        <result property="fWifiPwd" column="f_wifi_pwd"/>
+        <result property="fDeviceType" column="f_device_type"/>
+        <result property="fAlgorithm" column="f_algorithm"/>
+    </resultMap>
+
+    <select id="getMyList" resultType="com.dkha.entity.FvScDeviceEntity">
+        select t1.*
+        from fv_sc_device t1 where 1=1
+        <if test="fName != '%null%' and fName != null and fName.trim() != ''">
+            and t1.f_name like #{fName}
+        </if>
+        <if test="fserial != '%null%' and fserial != null and fserial.trim() != ''">
+            and t1.f_serial like #{fserial}
+        </if>
+        <if test="fstate != 'null' and fstate != null and fstate.trim() != ''">
+            and t1.f_state = #{fstate}
+        </if>
+        <if test="eqType != 'null' and eqType != null and eqType.trim() != '' and eqType == 0">
+            and t1.f_name not REGEXP '[^0-9.]'
+        </if>
+        <if test="eqType != 'null' and eqType != null and eqType.trim() != '' and eqType == 1">
+            and t1.f_name REGEXP '[^0-9.]'
+        </if>
+        <if test="startDate != 'null' and startDate != null and startDate.trim() != ''">
+            and t1.f_add_time <![CDATA[ >= ]]> #{startDate}
+        </if>
+        <if test="endDate != 'null' and endDate != null and endDate.trim() != ''">
+            and t1.f_add_time <![CDATA[ <= ]]> #{endDate}
+        </if>
+        order by cast(t1.f_name as signed) desc limit #{scol},#{ipagesize}
+    </select>
+
+    <select id="getMyCount" resultType="Long">
+        select count(1) total from fv_sc_device t1 where 1=1
+        <if test="fName != '%null%' and fName != null and fName.trim() != ''">
+            and t1.f_name like #{fName}
+        </if>
+        <if test="eqType != 'null' and eqType != null and eqType.trim() != '' and eqType == 0">
+            and t1.f_name not REGEXP '[^0-9.]'
+        </if>
+        <if test="eqType != 'null' and eqType != null and eqType.trim() != '' and eqType == 1">
+            and t1.f_name REGEXP '[^0-9.]'
+        </if>
+        <if test="fstate != 'null' and fstate != null and fstate.trim() != ''">
+            and t1.f_state = #{fstate}
+        </if>
+        <if test="startDate != 'null' and startDate != null and startDate.trim() != ''">
+            and t1.f_add_time <![CDATA[ >= ]]> #{startDate}
+        </if>
+        <if test="endDate != 'null' and endDate != null and endDate.trim() != ''">
+            and t1.f_add_time <![CDATA[ <= ]]> #{endDate}
+        </if>
+    </select>
+
+    <select id="getMyOne" resultType="com.dkha.entity.FvScDeviceEntity">
+        select t1.*,b.f_name community_name,c.f_name building_name from scweb.fv_sc_device t1
+        left join scweb.fv_sc_community b on t1.f_community_id=b.f_id
+        left join scweb.fv_sc_building c on t1.f_building_id=c.f_id where 1=1 and t1.f_id = #{fId}
+    </select>
+
+    <select id="getSuperUser" resultType="map">
+        select f_mqtt_serial,f_mqtt_password from scweb.fv_sc_all_user where f_name='jkyh7x1f' limit 1
+    </select>
+
+    <select id="getEqToPerNum" resultType="map">
+        select COUNT(*) number,a.f_device_id from scweb.fv_sc_key a
+        inner join scweb.fv_sc_all_user b on a.f_person_id=b.f_id
+        where a.f_is_face_syn=1
+        <foreach collection="setIds" item="fId" open="and a.f_device_id in (" separator="," close=")">
+            #{fId}
+        </foreach>
+        and LENGTH(IFNULL(b.f_face_url,0))>0
+        and (b.f_reg_face_status=2 or b.f_reg_face_status=1) group by a.f_device_id
+    </select>
+
+    <select id="getMyListEqToFace" resultType="com.dkha.dto.FvScDeviceFaceDTO">
+        select a.f_person_id,a.f_device_id,b.f_face_url,b.f_name,b.f_approve_time facedowntime from scweb.fv_sc_key a
+        inner join scweb.fv_sc_all_user b on a.f_person_id=b.f_id
+        where a.f_device_id = #{fDeviceId} and a.f_is_face_syn=1 and length(ifnull(b.f_face_url,0))>0 and (b.f_reg_face_status=2 or b.f_reg_face_status=1)
+        order by a.f_add_time desc limit #{scol},#{ipagesize}
+    </select>
+
+    <select id="getMyCountEqToFace" resultType="Long">
+        select count(1) total from scweb.fv_sc_key a
+        inner join scweb.fv_sc_all_user b on a.f_person_id=b.f_id
+        where a.f_device_id = #{fDeviceId} and a.f_is_face_syn=1 and length(ifnull(b.f_face_url,0))>0 and (b.f_reg_face_status=2 or b.f_reg_face_status=1)
+        order by a.f_add_time desc limit #{scol},#{ipagesize}
+    </select>
+
+    <insert id="insertBatchAndUpdate">
+        INSERT INTO `sc_aidoorfive_personlist` ( `ap_id`,`serial`, `password`, `user_id`,`img_id`, `username`, `userno`,`sex`, `photoimg`,`update_date`,`status` )
+        VALUES
+        <foreach collection ="list" item="item" index= "index" separator =",">
+            (
+            #{item.apId}, #{item.serial}, #{item.password}, #{item.userId},#{item.imgId},#{item.username},#{item.userno}, #{item.sex}, #{item.photoimg}, #{item.updateDate}, #{item.status}
+            )
+        </foreach>
+    </insert>
+    <insert id="insertFivePersonListEntity" >
+        INSERT INTO `sc_aidoorfive_personlist` ( `ap_id`,`serial`, `password`, `user_id`,`img_id`, `username`, `userno`,`sex`, `photoimg`,`update_date`,`status` )
+        VALUES  (
+            #{item.apId}, #{item.serial}, #{item.password}, #{item.userId},#{item.imgId},#{item.username},#{item.userno}, #{item.sex}, #{item.photoimg}, #{item.updateDate}, #{item.status}
+            )
+    </insert>
+
+    <select id="getByDrNum" resultType="com.dkha.entity.FvScDeviceEntity">
+        select f_serial,f_password,f_name from scweb.fv_sc_device where f_name=#{drNum}
+    </select>
+
+    <insert id="userInsert">
+        INSERT INTO `fv_sc_all_user` ( `f_name`,`f_face_url`,`f_agent_id`,`f_community_id`,`f_building_id`,`f_house_id`)
+        VALUES
+            (
+            #{map.fName}, #{map.fFaceUrl}, "34" , "55" , "53" , "1"
+            )
+    </insert>
+
+    <select id="findByFaceUrl" resultType="java.lang.Integer">
+        select f_id from scweb.fv_sc_all_user where f_face_url LIKE '%${result}%'
+    </select>
+
+    <insert id="personInsert">
+        INSERT INTO `fv_sc_person_info` ( `f_person_id`,`f_gender` )
+        VALUES
+        (
+        #{personMap.fPersonId}, #{personMap.fGender}
+        )
+    </insert>
+
+    <delete id="deleteBypersonId">
+        DELETE FROM scweb.fv_sc_all_user WHERE f_id=#{personId};
+    </delete>
+
+    <delete id="removeBypersonId">
+        DELETE FROM scweb.fv_sc_door_record where f_person_id=#{personId};
+    </delete>
+
+    <delete id="clearBypersonId">
+        DELETE FROM scweb.fv_sc_person_info WHERE f_person_id=#{personId};
+    </delete>
+
+    <select id="getBySerial" resultType="com.dkha.entity.FvScDeviceEntity">
+        select * from scweb.fv_sc_device where binary f_serial=#{serial}
+    </select>
+</mapper>
